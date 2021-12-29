@@ -67,15 +67,18 @@ function draw() {
   }
 }
 
-function Organic(radius, xpos, ypos, roughness, angle, color) {
-  this.radius = radius; //radius of blob
-  this.xpos = xpos; //x position of blob
-  this.ypos = ypos; // y position of blob
-  this.roughness = roughness; // magnitude of how much the circle is distorted
-  this.angle = angle; //how much to rotate the circle by
-  this.color = color; // color of the blob
+// aggiungi funzione color transition !!!!
+class Organic {
+  constructor(radius, xpos, ypos, roughness, angle, color) {
+    this.radius = radius; //radius of blob
+    this.xpos = xpos; //x position of blob
+    this.ypos = ypos; // y position of blob
+    this.roughness = roughness; // magnitude of how much the circle is distorted
+    this.angle = angle; //how much to rotate the circle by
+    this.color = color; // color of the blob
+  }
 
-  this.show = function (change, c, r) {
+  show(change, c, r) {
     noStroke(); // no stroke for the circle
     this.color = c;
     this.roughness = r * 10;
@@ -109,7 +112,19 @@ function Organic(radius, xpos, ypos, roughness, angle, color) {
     }
     endShape(); //end and create the shape
     pop();
-  };
+  }
+
+  function colorTransition() {
+    let currExp;
+    let prevExp;
+
+    lerpColor(colors.prevExp, colors.currExp, 0.50)
+
+    if (prevExp == currExp) { colorTransition = false} 
+    else { colorTransition = true}
+  }
+  // color.transition (valorini) crea espressione prece e corrente, se diversi eseguo transizione
+  // colorLerp tra colore prece e succ
 }
 
 function getFaceElements() {
