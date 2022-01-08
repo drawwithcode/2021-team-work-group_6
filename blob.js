@@ -10,7 +10,7 @@ class Blob {
       this.organics.push(
         new Organic(
           i,
-          1 + 2 * i,
+          1 + 20 * i,
           this.pos,
           i * 10,
           i * random(90),

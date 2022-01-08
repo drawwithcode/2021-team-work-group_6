@@ -15,15 +15,21 @@ let alpha = 50;
 
 let arr = [];
 let expressionObjects = [];
+let nextColors = [];
+let prevColors = [];
 let currColors = [];
 let currIntensity = [];
 let currExp = [];
+let prevExp = [];
 let currX = [];
 let blobs_creati = [];
 let X;
 
+let timeStamp = 0;
+
 let expressions;
 
+let transition = false;
 let blobCreati = false;
 
 function setup() {
@@ -32,7 +38,11 @@ function setup() {
   // noLoop();
   frameRate(30);
   change = 0;
+  prevExp = ["neutral", "neutral"];
+  currExp = ["neutral", "neutral"];
+  prevColors = [color(89, 84, 87, alpha), color(65, 91, 82, alpha)];
   currColors = [color(89, 84, 87, alpha), color(65, 91, 82, alpha)];
+  nextColors = [color(89, 84, 87, alpha), color(65, 91, 82, alpha)];
   colors = {
     happy: color(230, 13, 100, alpha),
     sad: color(77, 108, 250, alpha),
@@ -73,7 +83,7 @@ function draw() {
       //   if (i == 0) blobs[i].attracted(a1, 1);
       //   else blobs[i].attracted(a2, 1);
       //   blobs[i].update();
-      //   blobs[i].show(rough, currColors[i], currExp[i]);
+      //   blobs[i].show(rough, nextColors[i], currExp[i]);
       // }
 
       blobs_creati.forEach((b, index) => {
@@ -112,25 +122,46 @@ function getFaceElements() {
   detections.forEach((d, index) => {
     expressionObjects[index] = d.expressions;
     arr[index] = Object.values(d.expressions);
-    console.log("d.expressions:", d.expressions);
+    // console.log("d.expressions:", d.expressions);
     let maxi = max(arr[index]);
     // console.log("maxi:", maxi);
     //  For magico per espressione corrente in testa
     for (const e in d.expressions) {
       if (maxi == d.expressions[e]) {
+        prevExp[index] = currExp[index];
         currExp[index] = `${e}`;
 
         //  Fix: neutrale per troppo tempo
         //  Transizione fluida tra stati
         if (currExp[index] == "neutral") currIntensity[index] = 0.1;
         else currIntensity[index] = `${d.expressions[e]}`;
-        currColors[index] = colors[currExp[index]];
-        // console.log(" currX[index]:", currX[index]);
+        //  Assegno colore di expression attuale
+        //  Posizione X di blob
         currX[index] = d.detection._box._x;
         if (currX[index] < 200) {
           X = currX[index];
           blobs_creati[index] = 1;
         } else blobs_creati[index] = 0;
+
+        if (prevExp[index] != currExp[index] && !transition) {
+          console.log("TRANSITION");
+          transition = true;
+          timeStamp = Date.now();
+          nextColors[index] = colors[currExp[index]];
+          prevColors[index] = colors[prevExp[index]];
+
+          console.log("Da Precedente:", prevExp[index]);
+          console.log("a Corrente:", currExp[index]);
+        }
+        if (transition) {
+          currColors[index] = colorTransition(
+            prevColors[index],
+            nextColors[index],
+            timeStamp
+          );
+        } else if (!transition) {
+          currColors[index] = nextColors[index];
+        }
       }
     }
 
@@ -163,4 +194,20 @@ function shallowEquity(objects) {
 
   let perc = map(diff, 0, 2, 100, 0);
   return round(perc);
+}
+
+function colorTransition(c1, c2, lastTimestamp) {
+  console.log("c2:", c2);
+  console.log("c1:", c1);
+  const now = Date.now();
+  const interval = 1000;
+  const amt = (now - lastTimestamp) / interval;
+  console.log("lastTimestamp:", lastTimestamp);
+  console.log("amt:", amt);
+  // let amt = 0; // da 0 a 1
+  const lerped = lerpColor(c1, c2, amt);
+
+  if (amt >= 1) transition = false;
+
+  return lerped;
 }

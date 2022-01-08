@@ -51,5 +51,5 @@ video.addEventListener("play", () => {
     // faceapi.draw.drawFaceExpressions(canvas, resizedDetections);
 
     // detections.faceExpressionPrediction.expression
-  }, 500);
+  }, 1000);
 });
