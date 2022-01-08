@@ -43,7 +43,7 @@ function setup() {
   prevColors = [color(89, 84, 87, alpha), color(65, 91, 82, alpha)];
   currColors = [color(89, 84, 87, alpha), color(65, 91, 82, alpha)];
   nextColors = [color(89, 84, 87, alpha), color(65, 91, 82, alpha)];
-  colors = {
+  expression = {
     happy: color(230, 13, 100, alpha),
     sad: color(77, 108, 250, alpha),
     angry: color(177, 15, 46, alpha),
@@ -143,15 +143,16 @@ function getFaceElements() {
           blobs_creati[index] = 1;
         } else blobs_creati[index] = 0;
 
-        if (prevExp[index] != currExp[index] && !transition) {
+        console.log("transition:", transition);
+        if (prevExp[index] != currExp[index]) {
           console.log("TRANSITION");
           transition = true;
-          timeStamp = Date.now();
           nextColors[index] = colors[currExp[index]];
           prevColors[index] = colors[prevExp[index]];
 
           console.log("Da Precedente:", prevExp[index]);
           console.log("a Corrente:", currExp[index]);
+          timeStamp = Date.now();
         }
         if (transition) {
           currColors[index] = colorTransition(
@@ -202,8 +203,7 @@ function colorTransition(c1, c2, lastTimestamp) {
   const now = Date.now();
   const interval = 1000;
   const amt = (now - lastTimestamp) / interval;
-  console.log("lastTimestamp:", lastTimestamp);
-  console.log("amt:", amt);
+
   // let amt = 0; // da 0 a 1
   const lerped = lerpColor(c1, c2, amt);
 
