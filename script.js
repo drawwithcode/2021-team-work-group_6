@@ -28,14 +28,21 @@ video.addEventListener("play", () => {
   faceapi.matchDimensions(canvas, displaySize);
   setInterval(async () => {
     detections = await faceapi
-      .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
-      .withFaceLandmarks()
+      .detectAllFaces(
+        video,
+        new faceapi.TinyFaceDetectorOptions({ inputSize: 416 })
+      )
       .withFaceExpressions();
+    // detections = await faceapi
+    // .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
+    // .withFaceLandmarks()
+    // .withFaceExpressions();
     // detections = await faceapi
     //   .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions())
     //   .withFaceLandmarks()
     //   .withFaceExpressions();
-    console.log("detections:", detections);
+    // if (detections.lenght > 0)
+    // console.log("detections:", detections[0].detection._box._x);
     canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
 
     // const resizedDetections = faceapi.resizeResults(detections, displaySize);
@@ -44,5 +51,5 @@ video.addEventListener("play", () => {
     // faceapi.draw.drawFaceExpressions(canvas, resizedDetections);
 
     // detections.faceExpressionPrediction.expression
-  }, 50);
+  }, 500);
 });
