@@ -11,7 +11,7 @@ let a2;
 let sync = 0;
 // The variable change stores the rate of rotation and the y coordinate for noise later
 let change, colors;
-let alpha = 50;
+const alpha = 50;
 
 let arr = [];
 let expressionObjects = [];
@@ -43,7 +43,8 @@ function setup() {
   prevColors = [color(89, 84, 87, alpha), color(65, 91, 82, alpha)];
   currColors = [color(89, 84, 87, alpha), color(65, 91, 82, alpha)];
   nextColors = [color(89, 84, 87, alpha), color(65, 91, 82, alpha)];
-  expression = {
+
+  colors = {
     happy: color(230, 13, 100, alpha),
     sad: color(77, 108, 250, alpha),
     angry: color(177, 15, 46, alpha),
@@ -90,7 +91,8 @@ function draw() {
         let rough = currIntensity[index] * 10;
         //  Intensity of central point (-2, 2) --> 0-100%
         let mappedI = map(sync, 0, 100, -2, 2);
-        let mappedI_2 = map(sync, 0, 100, 0, 1);
+        let mappedI_2 = map(sync, 0, 100, 1, -1);
+        console.log("mappedI_2:", mappedI_2);
         blobs[b].attracted(a0, mappedI);
         if (b == 0) blobs[b].attracted(a1, mappedI_2);
         else blobs[b].attracted(a2, mappedI_2);
