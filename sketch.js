@@ -13,7 +13,7 @@ let sync = 0;
 let change = [0, 0];
 const alpha = 50;
 
-let arr = [];
+let expValues = [];
 let expressionObjects = [];
 let properties = [];
 let currIntensity = [];
@@ -164,8 +164,11 @@ function getFaceElements() {
   blobs_creati = [];
   detections.forEach((d, index) => {
     expressionObjects[index] = d.expressions;
-    arr[index] = Object.values(d.expressions);
-    let maxi = max(arr[index]);
+    // console.log("  expressionObjects[index]:", expressionObjects[index]);
+    //  let  expKeys[index] = Object.keys(d.expressions);
+    expValues[index] = Object.values(d.expressions);
+
+    let maxi = max(expValues[index]);
     //  For magico per espressione corrente in testa
     for (const e in d.expressions) {
       if (maxi == d.expressions[e]) {

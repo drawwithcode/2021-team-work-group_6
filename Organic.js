@@ -8,6 +8,7 @@ class Organic {
     this.color = color; // color of the blob
     this.xSpeed = 1;
     this.ySpeed = 1;
+    this.off = 0;
   }
 
   move(v) {
@@ -28,11 +29,12 @@ class Organic {
     //begin a shape based on the vertex points below
     beginShape();
 
+    // let off = 0;
+    this.off = 0;
     //The lines below create our vertex points
-    let off = _offset;
     for (let i = 0; i < TWO_PI; i += 0.1) {
       let offset = map(
-        noise(off, _change),
+        noise(this.off, _change),
         0,
         1,
         -this.roughness,
@@ -42,7 +44,7 @@ class Organic {
       let x = r * cos(i);
       let y = r * sin(i);
       vertex(x, y);
-      off += 0.1;
+      this.off += _offset;
     }
     endShape(); //end and create the shape
     pop();
@@ -53,6 +55,10 @@ class Organic {
     textSize(35);
     textAlign(CENTER);
     text(e, this.pos.x, this.pos.y);
+  }
+
+  expand() {
+    this.radius += 10;
   }
 
   // setting the particle in motion.
