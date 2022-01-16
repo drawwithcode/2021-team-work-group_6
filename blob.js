@@ -26,26 +26,26 @@ class Blob {
     this.pos.add(this.vel);
     this.acc.mult(0);
 
-    // const bounceReduction = 0.6;
+    const bounceReduction = 0.6;
 
-    // if (this.pos.x < 0) {
-    //   this.vel.mult(bounceReduction);
-    //   this.vel.reflect(createVector(1, 0));
-    //   this.pos.x = 0;
-    // } else if (this.pos.x > width) {
-    //   this.vel.mult(bounceReduction);
-    //   this.vel.reflect(createVector(1, 0));
-    //   this.pos.x = width;
-    // }
-    // if (this.pos.y < 0) {
-    //   this.vel.mult(bounceReduction);
-    //   this.vel.reflect(createVector(0, 1));
-    //   this.pos.y = 0;
-    // } else if (this.pos.y > height) {
-    //   this.vel.mult(bounceReduction);
-    //   this.vel.reflect(createVector(0, 1));
-    //   this.pos.y = height;
-    // }
+    if (this.pos.x < 0) {
+      this.vel.mult(bounceReduction);
+      this.vel.reflect(createVector(1, 0));
+      this.pos.x = 0;
+    } else if (this.pos.x > width) {
+      this.vel.mult(bounceReduction);
+      this.vel.reflect(createVector(1, 0));
+      this.pos.x = width;
+    }
+    if (this.pos.y < 0) {
+      this.vel.mult(bounceReduction);
+      this.vel.reflect(createVector(0, 1));
+      this.pos.y = 0;
+    } else if (this.pos.y > height) {
+      this.vel.mult(bounceReduction);
+      this.vel.reflect(createVector(0, 1));
+      this.pos.y = height;
+    }
   }
 
   show(rough, color, change, offset, e) {

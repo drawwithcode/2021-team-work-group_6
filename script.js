@@ -1,12 +1,13 @@
 // Tutorial: https://www.youtube.com/watch?v=CVClHLwv-4I&t=183s&ab_channel=WebDevSimplified
 
 const video = document.getElementById("video");
+const URL_MODELS = "/models";
 
 Promise.all([
-  faceapi.nets.tinyFaceDetector.loadFromUri("/models"),
-  faceapi.nets.faceLandmark68Net.loadFromUri("/models"),
-  faceapi.nets.faceRecognitionNet.loadFromUri("/models"),
-  faceapi.nets.faceExpressionNet.loadFromUri("/models"),
+  faceapi.nets.tinyFaceDetector.loadFromUri(URL_MODELS),
+  faceapi.nets.faceLandmark68Net.loadFromUri(URL_MODELS),
+  faceapi.nets.faceRecognitionNet.loadFromUri(URL_MODELS),
+  faceapi.nets.faceExpressionNet.loadFromUri(URL_MODELS),
 ]).then(startVideo);
 
 function startVideo() {
@@ -19,11 +20,9 @@ function startVideo() {
   );
 }
 
-// startVideo();
 let detections;
 video.addEventListener("play", () => {
   const canvas = faceapi.createCanvasFromMedia(video);
-  // document.body.append(canvas);
   const displaySize = { width: windowWidth, height: windowHeight };
   faceapi.matchDimensions(canvas, displaySize);
   setInterval(async () => {
@@ -33,23 +32,7 @@ video.addEventListener("play", () => {
         new faceapi.TinyFaceDetectorOptions({ inputSize: 416 })
       )
       .withFaceExpressions();
-    // detections = await faceapi
-    // .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
-    // .withFaceLandmarks()
-    // .withFaceExpressions();
-    // detections = await faceapi
-    //   .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions())
-    //   .withFaceLandmarks()
-    //   .withFaceExpressions();
-    // if (detections.lenght > 0)
-    // console.log("detections:", detections[0].detection._box._x);
+    console.log("detections:", detections);
     canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
-
-    // const resizedDetections = faceapi.resizeResults(detections, displaySize);
-    // faceapi.draw.drawDetections(canvas, resizedDetections);
-    // faceapi.draw.drawFaceLandmarks(canvas, resizedDetections);
-    // faceapi.draw.drawFaceExpressions(canvas, resizedDetections);
-
-    // detections.faceExpressionPrediction.expression
   }, 1000);
 });
