@@ -14,7 +14,7 @@ class Blob {
           this.pos,
           i * 10,
           i * random(90),
-          colors.neutral
+          expressions.neutral.color
         )
       );
     }
@@ -48,27 +48,28 @@ class Blob {
     // }
   }
 
-  show(rough, c, e) {
+  show(rough, color, change, offset, e) {
     stroke(255);
-    point(this.pos.x, this.pos.y);
+    // point(this.pos.x, this.pos.y);
     this.organics.forEach((o) => {
       o.move(this.pos);
-      o.show(c, rough);
+      o.show(rough, color, change, offset);
       o.showText(e);
     });
   }
 
   attracted(target, intensity) {
-    // var dir = target - this.pos
-    var force = p5.Vector.sub(target, this.pos);
-    var d = force.mag();
+    // let dir = target - this.pos
+    let force = p5.Vector.sub(target, this.pos);
+    let d = force.mag();
+    const G = 50;
+    const speed = 40;
+    const strength = G / d;
     d = constrain(d, 1, 100);
-    var G = 50;
-    var strength = G / d;
     // if (d < 20) force.mult(-force.mag());
-    if (d < 5 && intensity > 0.5) this.vel.set(0, 0);
+    if ((d < 5 && intensity > 0.5) || detections.length < 2) this.vel.set(0, 0);
     else {
-      force.setMag((strength * intensity * 40) / (d * d));
+      force.setMag((strength * intensity * speed) / (d * d));
       this.acc.add(force);
     }
     // if (d < 20) force.sub(-this.vel);

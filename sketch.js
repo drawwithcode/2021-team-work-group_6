@@ -15,9 +15,7 @@ const alpha = 50;
 
 let arr = [];
 let expressionObjects = [];
-let nextColors = [];
-let prevColors = [];
-let currColors = [];
+let properties = [];
 let currIntensity = [];
 let currExp = [];
 let prevExp = [];
@@ -28,34 +26,98 @@ let X;
 let timeStamp = 0;
 
 let expressions;
+let expression = [];
 
+let screen_1 = false;
+let screen_2 = true;
+let screen_3 = false;
 let transition = false;
 let blobCreati = false;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
   background("black");
-  // noLoop();
-  frameRate(30);
+  frameRate(24);
   change = 0;
-  prevExp = ["neutral", "neutral"];
-  currExp = ["neutral", "neutral"];
-  prevColors = [color(89, 84, 87, alpha), color(65, 91, 82, alpha)];
-  currColors = [color(89, 84, 87, alpha), color(65, 91, 82, alpha)];
-  nextColors = [color(89, 84, 87, alpha), color(65, 91, 82, alpha)];
 
-  colors = {
-    happy: color(230, 13, 100, alpha),
-    sad: color(77, 108, 250, alpha),
-    angry: color(177, 15, 46, alpha),
-    fearful: color(154, 72, 208, alpha),
-    disgusted: color(125, 223, 100, alpha),
-    surprised: color(255, 107, 46, alpha),
-    neutral: color(89, 84, 87, alpha),
+  expressions = {
+    disgusted: {
+      color: color(125, 223, 100, alpha),
+      change: 0.004,
+      offset: 0.03,
+    },
+
+    happy: {
+      color: color(230, 13, 100, alpha),
+      change: 0.03,
+      offset: 0.1,
+    },
+
+    angry: {
+      color: color(177, 15, 46, alpha),
+      change: 0.08,
+      offset: 0.9,
+    },
+
+    surprised: {
+      color: color(255, 107, 46, alpha),
+      change: 0.01,
+      offset: 0.3,
+    },
+
+    sad: {
+      color: color(77, 108, 250, alpha),
+      change: 0.01,
+      offset: 0.1,
+    },
+
+    fearful: {
+      color: color(154, 72, 208, alpha),
+      change: 0.04,
+      offset: 0.3,
+    },
+    neutral: {
+      color: color(89, 84, 87, alpha),
+      change: 0.0,
+      offset: 0.0,
+    },
   };
-  expressions = Object.keys(colors);
+  // expressions = Object.keys(colors);
+
+  // expression = [
+  //   {
+  //     prevExp: "neutral",
+  //     nextExp: "neutral",
+  //   },
+  //   {
+  //     prevExp: "neutral",
+  //     nextExp: "neutral",
+  //   },
+  // ];
+
   for (let j = 0; j < 2; j++) {
     blobs[j] = new Blob((j + 1) * (width / 3), height / 2);
+    expression[j] = {
+      prevExp: "neutral",
+      nextExp: "neutral",
+    };
+    properties[j] = {
+      prev: {
+        color: color(89, 84, 87, alpha),
+        change: 0,
+        offset: 0,
+      },
+      curr: {
+        color: color(89, 84, 87, alpha),
+        change: 0,
+        offset: 0,
+      },
+      next: {
+        color: color(89, 84, 87, alpha),
+        change: 0,
+        offset: 0,
+      },
+    };
   }
 
   a0 = createVector(width / 2, height / 2);
@@ -64,6 +126,10 @@ function setup() {
 }
 
 function draw() {
+  if (screen_2) drawScreen2();
+}
+
+function drawScreen2() {
   background("black");
   strokeWeight(4);
   stroke(0, 255, 0);
@@ -76,28 +142,22 @@ function draw() {
     text("Faces detected: " + detections.length, 100, 100);
     if (detections.length > 0) {
       getFaceElements();
-      // for (let i = 0; i < detections.length; i++) {
-      //   let rough = currIntensity[i] * 10;
-      //   //  Intensity of central point (-2, 2) --> 0-100%
-      //   let mappedI = map(sync, 0, 100, -2, 2);
-      //   blobs[i].attracted(a0, mappedI);
-      //   if (i == 0) blobs[i].attracted(a1, 1);
-      //   else blobs[i].attracted(a2, 1);
-      //   blobs[i].update();
-      //   blobs[i].show(rough, nextColors[i], currExp[i]);
-      // }
-
       blobs_creati.forEach((b, index) => {
         let rough = currIntensity[index] * 10;
         //  Intensity of central point (-2, 2) --> 0-100%
         let mappedI = map(sync, 0, 100, -2, 2);
         let mappedI_2 = map(sync, 0, 100, 1, -1);
-        console.log("mappedI_2:", mappedI_2);
         blobs[b].attracted(a0, mappedI);
         if (b == 0) blobs[b].attracted(a1, mappedI_2);
         else blobs[b].attracted(a2, mappedI_2);
         blobs[b].update();
-        blobs[b].show(rough, currColors[index], currExp[index]);
+        blobs[b].show(
+          rough,
+          properties[index].curr.color,
+          properties[index].curr.change + change,
+          properties[index].curr.offset,
+          expression[index].nextExp
+        );
       });
 
       //  Speed of change
@@ -105,12 +165,11 @@ function draw() {
 
       let spacing = 30;
 
-      //   arr.forEach((ex, index) => {
-      //     ex.forEach((e, index) => {
-      //       text("AAA" + e, X, height / 2 + spacing * (index + 30));
-      //       console.log("e:", e);
-      //     });
-      //   });
+      // expressionObjects.forEach((ex, index) => {
+      //   fill(colors[Object.key(ex[index])]);
+      //   text("AAA" + e, X, height / 2 + spacing * (index + 30));
+      //   console.log("e:", e);
+      // });
     }
     if (detections.length == 2)
       text("Syinc rate: " + sync + "%", width / 2, 100);
@@ -124,18 +183,17 @@ function getFaceElements() {
   detections.forEach((d, index) => {
     expressionObjects[index] = d.expressions;
     arr[index] = Object.values(d.expressions);
-    // console.log("d.expressions:", d.expressions);
     let maxi = max(arr[index]);
-    // console.log("maxi:", maxi);
     //  For magico per espressione corrente in testa
     for (const e in d.expressions) {
       if (maxi == d.expressions[e]) {
-        prevExp[index] = currExp[index];
-        currExp[index] = `${e}`;
+        expression[index].prevExp = expression[index].nextExp;
+        expression[index].nextExp = `${e}`;
+        const prev = expression[index].prevExp;
+        const next = expression[index].nextExp;
 
         //  Fix: neutrale per troppo tempo
-        //  Transizione fluida tra stati
-        if (currExp[index] == "neutral") currIntensity[index] = 0.1;
+        if (next == "neutral") currIntensity[index] = 0.1;
         else currIntensity[index] = `${d.expressions[e]}`;
         //  Assegno colore di expression attuale
         //  Posizione X di blob
@@ -145,25 +203,23 @@ function getFaceElements() {
           blobs_creati[index] = 1;
         } else blobs_creati[index] = 0;
 
-        console.log("transition:", transition);
-        if (prevExp[index] != currExp[index]) {
+        //  Transizione fluida tra stati
+        if (prev != next) {
           console.log("TRANSITION");
           transition = true;
-          nextColors[index] = colors[currExp[index]];
-          prevColors[index] = colors[prevExp[index]];
-
-          console.log("Da Precedente:", prevExp[index]);
-          console.log("a Corrente:", currExp[index]);
           timeStamp = Date.now();
+          properties[index].prev = expressions[prev];
+          properties[index].next = expressions[next];
         }
+
         if (transition) {
-          currColors[index] = colorTransition(
-            prevColors[index],
-            nextColors[index],
+          properties[index].curr = propertiesTransitions(
+            properties[index].prev,
+            properties[index].next,
             timeStamp
           );
         } else if (!transition) {
-          currColors[index] = nextColors[index];
+          properties[index].curr.color = expressions[next].color;
         }
       }
     }
@@ -177,15 +233,9 @@ function getFaceElements() {
   });
   if (detections.length == 2) {
     sync = shallowEquity(expressionObjects);
-    console.log("sync:", sync + "%");
+    // console.log("sync:", sync + "%");
   }
 }
-
-//  Sync in base a pesi di emozioni!!
-// function getSync(cE) {
-//   if (cE[0] == cE[1]) return 100;
-//   else return 0;
-// }
 
 //  shallowEquity tra i due oggetti--> Misurare Delta per ogni espressione--> Sottrarre Delta da TOT--> Mapparlo al 100%
 function shallowEquity(objects) {
@@ -199,17 +249,30 @@ function shallowEquity(objects) {
   return round(perc);
 }
 
-function colorTransition(c1, c2, lastTimestamp) {
-  console.log("c2:", c2);
-  console.log("c1:", c1);
+function propertiesTransitions(o1, o2, lastTimestamp) {
   const now = Date.now();
   const interval = 1000;
   const amt = (now - lastTimestamp) / interval;
+  console.log("amt:", amt);
+
+  const c1 = o1.color;
+  console.log("c1:", c1);
+  const c2 = o2.color;
+  console.log("c2:", c2);
 
   // let amt = 0; // da 0 a 1
-  const lerped = lerpColor(c1, c2, amt);
+  const lerped_color = lerpColor(c1, c2, amt);
+  const lerped_change = lerp(o1.change, o2.change, amt);
+  const lerped_offset = lerp(o1.offset, o2.offset, amt);
+  console.log("lerped_color:", lerped_color);
+
+  const obj = {
+    color: lerped_color,
+    change: lerped_change,
+    offset: lerped_offset,
+  };
 
   if (amt >= 1) transition = false;
 
-  return lerped;
+  return obj;
 }
