@@ -1,148 +1,259 @@
 // organic is used to store the list of instances of Organic objects that we will create
-let organics = [];
-let organics2 = [];
-// The variable change stores the rate of rotation and the y coordinate for noise later
-let change, colors;
-let alpha = 50;
+let blobs = [];
+// Daniel Shiffman
+// http://codingtra.in
+// Attraction / Repulsion
+// Video: https://youtu.be/OAcXnzRNiCY
+let a0;
+let a1;
+let a2;
 
-let currColor;
-let currIntensity;
+let sync = 0;
+// The variable change stores the rate of rotation and the y coordinate for noise later
+let change = [0, 0];
+const alpha = 50;
+
+let arr = [];
+let expressionObjects = [];
+let properties = [];
+let currIntensity = [];
+let currX = [];
+let blobs_creati = [];
+let X;
+
+let timeStamp = 0;
 
 let expressions;
+let expression = [];
+
+let screen_1 = false;
+let screen_2 = true;
+let screen_3 = false;
+let transition = false;
+let blobCreati = false;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
   background("black");
-  // noLoop();
-  frameRate(30);
-  change = 0;
-  currColor = color(89, 84, 87, alpha);
-  colors = {
-    happy: color(230, 13, 100, alpha),
-    sad: color(77, 108, 250, alpha),
-    angry: color(177, 15, 46, alpha),
-    fearful: color(154, 72, 208, alpha),
-    disgusted: color(125, 223, 100, alpha),
-    surprised: color(255, 107, 46, alpha),
-    neutral: color(89, 84, 87, alpha),
+  frameRate(24);
+
+  expressions = {
+    disgusted: {
+      color: color(125, 223, 100, alpha),
+      changeIncrement: 0.004,
+      offset: 0.03,
+    },
+    happy: {
+      color: color(230, 13, 100, alpha),
+      changeIncrement: 0.03,
+      offset: 0.1,
+    },
+    angry: {
+      color: color(177, 15, 46, alpha),
+      changeIncrement: 0.08,
+      offset: 0.9,
+    },
+    surprised: {
+      color: color(255, 107, 46, alpha),
+      changeIncrement: 0.01,
+      offset: 0.3,
+    },
+    sad: {
+      color: color(77, 108, 250, alpha),
+      changeIncrement: 0.01,
+      offset: 0.1,
+    },
+    fearful: {
+      color: color(154, 72, 208, alpha),
+      changeIncrement: 0.04,
+      offset: 0.3,
+    },
+    neutral: {
+      color: color(89, 84, 87, alpha),
+      changeIncrement: 0.0,
+      offset: 0.0,
+    },
   };
-  expressions = Object.keys(colors);
+  // expressions = Object.keys(colors);
 
-  for (let i = 0; i < 50; i++) {
-    organics.push(
-      new Organic(
-        0.5 + 2 * i,
-        width / 4,
-        height / 2,
-        i * 10,
-        i * random(90),
-        colors.neutral
-      )
-    );
-
-    organics2.push(
-      new Organic(
-        0.5 + 2 * i,
-        width / 2,
-        height / 2,
-        i * 10,
-        i * random(90),
-        colors.neutral
-      )
-    );
+  //  Initializing objects and creating blobs
+  for (let j = 0; j < 2; j++) {
+    blobs[j] = new Blob((j + 1) * (width / 3), height / 2);
+    expression[j] = {
+      prevExp: "neutral",
+      nextExp: "neutral",
+    };
+    properties[j] = {
+      prev: {
+        color: color(89, 84, 87, alpha),
+        changeIncrement: 0,
+        offset: 0,
+      },
+      curr: {
+        color: color(89, 84, 87, alpha),
+        changeIncrement: 0,
+        offset: 0,
+      },
+      next: {
+        color: color(89, 84, 87, alpha),
+        changeIncrement: 0,
+        offset: 0,
+      },
+    };
   }
+
+  a0 = createVector(width / 2, height / 2);
+  a1 = createVector(100, height / 2);
+  a2 = createVector(width - 100, height / 2);
 }
 
 function draw() {
-  background("black");
-  if (detections) {
-    getFaceElements();
-    for (let i = 0; i < organics.length; i++) {
-      let rough = currIntensity * 10;
-      organics[i].show(change, currColor, rough);
-      organics2[i].show(change, currColor, rough);
-    }
-    //  Speed of change
-    change += 0.03;
-  }
+  if (screen_2) drawScreen2();
 }
 
-function Organic(radius, xpos, ypos, roughness, angle, color) {
-  this.radius = radius; //radius of blob
-  this.xpos = xpos; //x position of blob
-  this.ypos = ypos; // y position of blob
-  this.roughness = roughness; // magnitude of how much the circle is distorted
-  this.angle = angle; //how much to rotate the circle by
-  this.color = color; // color of the blob
+function drawScreen2() {
+  background("black");
+  strokeWeight(4);
+  stroke(0, 255, 0);
+  point(a0.x, a0.y);
+  point(a1.x, a1.y);
+  point(a2.x, a2.y);
+  if (detections) {
+    textSize(20);
+    noStroke();
+    text("Faces detected: " + detections.length, 100, 100);
+    if (detections.length > 0) {
+      getFaceElements();
+      blobs_creati.forEach((b, index) => {
+        let rough = currIntensity[index] * 10;
+        //  Intensity of central point (-2, 2) --> 0-100%
+        let mappedI = map(sync, 0, 100, -2, 2);
+        let mappedI_2 = map(sync, 0, 100, 1, -1);
+        blobs[b].attracted(a0, mappedI);
+        if (b == 0) blobs[b].attracted(a1, mappedI_2);
+        else blobs[b].attracted(a2, mappedI_2);
+        blobs[b].update();
+        //  Speed of change
+        change[index] += properties[index].curr.changeIncrement;
+        blobs[b].show(
+          rough,
+          properties[index].curr.color,
+          change[index],
+          properties[index].curr.offset,
+          expression[index].nextExp
+        );
+      });
 
-  this.show = function (change, c, r) {
-    noStroke(); // no stroke for the circle
-    this.color = c;
-    this.roughness = r * 10;
-    fill(this.color); //color to fill the blob
+      // change += properties[index].curr.change;
+      let spacing = 30;
 
-    //we enclose things between push and pop so that all transformations within only affect items within
-    push();
-    translate(xpos, ypos); //move to xpos, ypos
-    rotate(this.angle + change); //rotate by this.angle+change
-
-    //begin a shape based on the vertex points below
-    beginShape();
-
-    //The lines below create our vertex points
-    let off = 0;
-    for (let i = 0; i < TWO_PI; i += 0.1) {
-      // if (i % 0.1 == 0) {
-      let offset = map(
-        noise(off, change),
-        0,
-        1,
-        -this.roughness,
-        this.roughness
-      );
-      let r = this.radius + offset;
-      let x = r * cos(i);
-      let y = r * sin(i);
-      vertex(x, y);
-      // }
-      off += 0.1;
+      // expressionObjects.forEach((ex, index) => {
+      //   fill(colors[Object.key(ex[index])]);
+      //   text("AAA" + e, X, height / 2 + spacing * (index + 30));
+      //   console.log("e:", e);
+      // });
     }
-    endShape(); //end and create the shape
-    pop();
-  };
+    if (detections.length == 2)
+      text("Syinc rate: " + sync + "%", width / 2, 100);
+    else text("Not enough faces!", width / 2, 100);
+  }
 }
 
 function getFaceElements() {
   //  Per ogni faccia rilevata
-  detections.forEach((d) => {
-    // let myDictionary = createNumberDict(d.expressions);
-    // console.log("myDictionary:", myDictionary);
-    // let maxV = myDictionary.maxValue();
-    let currExp;
-    let arr = Object.values(d.expressions);
-    let maxi = max(arr);
-    console.log("maxi:", maxi);
+  blobs_creati = [];
+  detections.forEach((d, index) => {
+    expressionObjects[index] = d.expressions;
+    arr[index] = Object.values(d.expressions);
+    let maxi = max(arr[index]);
     //  For magico per espressione corrente in testa
     for (const e in d.expressions) {
       if (maxi == d.expressions[e]) {
-        currExp = `${e}`;
-        console.log("currExp:", currExp);
+        expression[index].prevExp = expression[index].nextExp;
+        expression[index].nextExp = `${e}`;
+        const prev = expression[index].prevExp;
+        const next = expression[index].nextExp;
+
         //  Fix: neutrale per troppo tempo
+        if (next == "neutral") currIntensity[index] = 0.1;
+        else currIntensity[index] = `${d.expressions[e]}`;
+        //  Assegno colore di expression attuale
+        //  Posizione X di blob
+        currX[index] = d.detection._box._x;
+        if (currX[index] < 200) {
+          X = currX[index];
+          blobs_creati[index] = 1;
+        } else blobs_creati[index] = 0;
+
         //  Transizione fluida tra stati
-        if (currExp == "neutral") currIntensity = 0.1;
-        else currIntensity = `${d.expressions[e]}`;
-        console.log("currIntensity:", currIntensity);
-        console.log("colors.currExp:", colors[currExp]);
-        currColor = colors[currExp];
-        // stroke(colors[currExp]);
+        if (prev != next) {
+          console.log("TRANSITION");
+          transition = true;
+          timeStamp = Date.now();
+          properties[index].prev = expressions[prev];
+          properties[index].next = expressions[next];
+        }
+
+        if (transition) {
+          properties[index].curr = propertiesTransitions(
+            properties[index].prev,
+            properties[index].next,
+            timeStamp
+          );
+        } else if (!transition) {
+          properties[index].curr.color = expressions[next].color;
+        }
       }
     }
 
-    //  Per posizione dei punti della faccia
-    d.landmarks._positions.forEach((p) => {
-      // let mappedX = map(p._x, 0, 640, 0, width);
-      // let mappedY = map(p._y, 0, 480, 0, height);
-      // point(p._x, p._y);
-    });
+    // //  Per posizione dei punti della faccia
+    // d.landmarks._positions.forEach((p) => {
+    //   // let mappedX = map(p._x, 0, 640, 0, width);
+    //   // let mappedY = map(p._y, 0, 480, 0, height);
+    //   // point(p._x, p._y);
+    // });
   });
+  if (detections.length == 2) {
+    sync = shallowEquity(expressionObjects);
+    // console.log("sync:", sync + "%");
+  }
+}
+
+//  shallowEquity tra i due oggetti--> Misurare Delta per ogni espressione--> Sottrarre Delta da TOT--> Mapparlo al 100%
+function shallowEquity(objects) {
+  const keys = Object.keys(objects[0]);
+  let diff = 0;
+  for (let key of keys) {
+    diff += abs(objects[0][key] - objects[1][key]);
+  }
+
+  let perc = map(diff, 0, 2, 100, 0);
+  return round(perc);
+}
+
+function propertiesTransitions(o1, o2, lastTimestamp) {
+  const now = Date.now();
+  const interval = 1000;
+  const amt = (now - lastTimestamp) / interval;
+  console.log("amt:", amt);
+
+  const c1 = o1.color;
+  console.log("c1:", c1);
+  const c2 = o2.color;
+  console.log("c2:", c2);
+
+  // let amt = 0; // da 0 a 1
+  const lerped_color = lerpColor(c1, c2, amt);
+  const lerped_change = lerp(o1.changeIncrement, o2.changeIncrement, amt);
+  const lerped_offset = lerp(o1.offset, o2.offset, amt);
+
+  const obj = {
+    color: lerped_color,
+    changeIncrement: lerped_change,
+    offset: lerped_offset,
+  };
+
+  if (amt >= 1) transition = false;
+
+  return obj;
 }
