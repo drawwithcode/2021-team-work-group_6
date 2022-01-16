@@ -10,15 +10,13 @@ let a2;
 
 let sync = 0;
 // The variable change stores the rate of rotation and the y coordinate for noise later
-let change, colors;
+let change = [0, 0];
 const alpha = 50;
 
 let arr = [];
 let expressionObjects = [];
 let properties = [];
 let currIntensity = [];
-let currExp = [];
-let prevExp = [];
 let currX = [];
 let blobs_creati = [];
 let X;
@@ -38,63 +36,47 @@ function setup() {
   createCanvas(windowWidth, windowHeight);
   background("black");
   frameRate(24);
-  change = 0;
 
   expressions = {
     disgusted: {
       color: color(125, 223, 100, alpha),
-      change: 0.004,
+      changeIncrement: 0.004,
       offset: 0.03,
     },
-
     happy: {
       color: color(230, 13, 100, alpha),
-      change: 0.03,
+      changeIncrement: 0.03,
       offset: 0.1,
     },
-
     angry: {
       color: color(177, 15, 46, alpha),
-      change: 0.08,
+      changeIncrement: 0.08,
       offset: 0.9,
     },
-
     surprised: {
       color: color(255, 107, 46, alpha),
-      change: 0.01,
+      changeIncrement: 0.01,
       offset: 0.3,
     },
-
     sad: {
       color: color(77, 108, 250, alpha),
-      change: 0.01,
+      changeIncrement: 0.01,
       offset: 0.1,
     },
-
     fearful: {
       color: color(154, 72, 208, alpha),
-      change: 0.04,
+      changeIncrement: 0.04,
       offset: 0.3,
     },
     neutral: {
       color: color(89, 84, 87, alpha),
-      change: 0.0,
+      changeIncrement: 0.0,
       offset: 0.0,
     },
   };
   // expressions = Object.keys(colors);
 
-  // expression = [
-  //   {
-  //     prevExp: "neutral",
-  //     nextExp: "neutral",
-  //   },
-  //   {
-  //     prevExp: "neutral",
-  //     nextExp: "neutral",
-  //   },
-  // ];
-
+  //  Initializing objects and creating blobs
   for (let j = 0; j < 2; j++) {
     blobs[j] = new Blob((j + 1) * (width / 3), height / 2);
     expression[j] = {
@@ -104,17 +86,17 @@ function setup() {
     properties[j] = {
       prev: {
         color: color(89, 84, 87, alpha),
-        change: 0,
+        changeIncrement: 0,
         offset: 0,
       },
       curr: {
         color: color(89, 84, 87, alpha),
-        change: 0,
+        changeIncrement: 0,
         offset: 0,
       },
       next: {
         color: color(89, 84, 87, alpha),
-        change: 0,
+        changeIncrement: 0,
         offset: 0,
       },
     };
@@ -151,18 +133,18 @@ function drawScreen2() {
         if (b == 0) blobs[b].attracted(a1, mappedI_2);
         else blobs[b].attracted(a2, mappedI_2);
         blobs[b].update();
+        //  Speed of change
+        change[index] += properties[index].curr.changeIncrement;
         blobs[b].show(
           rough,
           properties[index].curr.color,
-          properties[index].curr.change + change,
+          change[index],
           properties[index].curr.offset,
           expression[index].nextExp
         );
       });
 
-      //  Speed of change
-      change += 0.03;
-
+      // change += properties[index].curr.change;
       let spacing = 30;
 
       // expressionObjects.forEach((ex, index) => {
@@ -262,13 +244,12 @@ function propertiesTransitions(o1, o2, lastTimestamp) {
 
   // let amt = 0; // da 0 a 1
   const lerped_color = lerpColor(c1, c2, amt);
-  const lerped_change = lerp(o1.change, o2.change, amt);
+  const lerped_change = lerp(o1.changeIncrement, o2.changeIncrement, amt);
   const lerped_offset = lerp(o1.offset, o2.offset, amt);
-  console.log("lerped_color:", lerped_color);
 
   const obj = {
     color: lerped_color,
-    change: lerped_change,
+    changeIncrement: lerped_change,
     offset: lerped_offset,
   };
 
