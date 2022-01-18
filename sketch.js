@@ -146,6 +146,7 @@ function drawScreen2() {
     }
     if (detections.length == 2) {
       text("Syinc rate: " + sync + "%", width / 2, 100);
+      sync = shallowEquity(expressionObjects);
     } else text("Not enough faces!", width / 2, 100);
   }
 }
@@ -204,16 +205,17 @@ function getFaceElements() {
       }
 
       //  Display expressions values
-      if (detections.length == 2) {
-        drawExpressionValues(e, d.expressions, index, i);
-        i++;
-      }
+      // if (detections.length == 2)
+      // {
+      drawExpressionValues(e, d.expressions, index, i);
+      i++;
+      // }
     }
   });
-  if (detections.length == 2) {
-    sync = shallowEquity(expressionObjects);
-    // console.log("sync:", sync + "%");
-  }
+  // if (detections.length == 2) {
+  //   sync = shallowEquity(expressionObjects);
+  //   // console.log("sync:", sync + "%");
+  // }
 }
 
 //   Function to display the values of the expressions
@@ -223,10 +225,12 @@ function drawExpressionValues(e, expObj, index, i) {
     push();
     let offX = 0;
     let offY = (height / 3) * 2;
-    // offX = index == 0 ? width / 3 : (width / 3) * 2;
-    if (blobs[index].pos.x <= width / 2) offX = width / 10;
-    else if (blobs[index].pos.x > width / 2) offX = width - width / 8;
 
+    if (currX[index] <= 200) {
+      offX = width - width / 8;
+    } else {
+      offX = width / 100;
+    }
     translate(offX, offY);
     const _color = expressions[e].color;
     let _value = round(expObj[e] * 10, 3);
