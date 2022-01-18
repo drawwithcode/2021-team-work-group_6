@@ -164,6 +164,9 @@ function getFaceElements() {
   blobs_creati = [];
   detections.forEach((d, index) => {
     expressionObjects[index] = d.expressions;
+    // expKeys[index] = Object.keys(d.expressions);
+    //  expValues[index] = Object.values(d.expressions);
+
     arr[index] = Object.values(d.expressions);
     let maxi = max(arr[index]);
     //  For magico per espressione corrente in testa
@@ -205,6 +208,8 @@ function getFaceElements() {
         }
       }
     }
+
+    // console.log(expKeys[index] + ": " + expValues[index]);
 
     // //  Per posizione dei punti della faccia
     // d.landmarks._positions.forEach((p) => {
