@@ -28,14 +28,14 @@ class Blob {
 
     const bounceReduction = 0.6;
 
-    if (this.pos.x < 0) {
+    if (this.pos.x < a1.x) {
       this.vel.mult(bounceReduction);
       this.vel.reflect(createVector(1, 0));
-      this.pos.x = 0;
-    } else if (this.pos.x > width) {
+      this.pos.x = a1.x;
+    } else if (this.pos.x > a2.x) {
       this.vel.mult(bounceReduction);
       this.vel.reflect(createVector(1, 0));
-      this.pos.x = width;
+      this.pos.x = a2.x;
     }
     if (this.pos.y < 0) {
       this.vel.mult(bounceReduction);
@@ -55,6 +55,8 @@ class Blob {
       o.move(this.pos);
       o.show(rough, color, change, offset);
       o.showText(e);
+      //  Blob già al centro?????
+      // if ((this.pos.x = width / 2)) o.expand();
     });
   }
 

@@ -13,7 +13,7 @@ let sync = 0;
 let change = [0, 0];
 const alpha = 50;
 
-let arr = [];
+let expValues = [];
 let expressionObjects = [];
 let properties = [];
 let currIntensity = [];
@@ -143,19 +143,10 @@ function drawScreen2() {
           expression[index].nextExp
         );
       });
-
-      // change += properties[index].curr.change;
-      let spacing = 30;
-
-      // expressionObjects.forEach((ex, index) => {
-      //   fill(colors[Object.key(ex[index])]);
-      //   text("AAA" + e, X, height / 2 + spacing * (index + 30));
-      //   console.log("e:", e);
-      // });
     }
-    if (detections.length == 2)
+    if (detections.length == 2) {
       text("Syinc rate: " + sync + "%", width / 2, 100);
-    else text("Not enough faces!", width / 2, 100);
+    } else text("Not enough faces!", width / 2, 100);
   }
 }
 
@@ -164,11 +155,14 @@ function getFaceElements() {
   blobs_creati = [];
   detections.forEach((d, index) => {
     expressionObjects[index] = d.expressions;
-    // expKeys[index] = Object.keys(d.expressions);
-    //  expValues[index] = Object.values(d.expressions);
 
-    arr[index] = Object.values(d.expressions);
-    let maxi = max(arr[index]);
+    //  let  expKeys[index] = Object.keys(d.expressions);
+    expValues[index] = Object.values(d.expressions);
+    // console.table(expValues[index]);
+
+    let maxi = max(expValues[index]);
+    let i = 0;
+
     //  For magico per espressione corrente in testa
     for (const e in d.expressions) {
       if (maxi == d.expressions[e]) {
@@ -191,6 +185,7 @@ function getFaceElements() {
         //  Transizione fluida tra stati
         if (prev != next) {
           console.log("TRANSITION");
+          console.table(d.expressions);
           transition = true;
           timeStamp = Date.now();
           properties[index].prev = expressions[prev];
@@ -207,20 +202,46 @@ function getFaceElements() {
           properties[index].curr.color = expressions[next].color;
         }
       }
+
+      //  Display expressions values
+      if (detections.length == 2) {
+        drawExpressionValues(e, d.expressions, index, i);
+        i++;
+      }
     }
-
-    // console.log(expKeys[index] + ": " + expValues[index]);
-
-    // //  Per posizione dei punti della faccia
-    // d.landmarks._positions.forEach((p) => {
-    //   // let mappedX = map(p._x, 0, 640, 0, width);
-    //   // let mappedY = map(p._y, 0, 480, 0, height);
-    //   // point(p._x, p._y);
-    // });
   });
   if (detections.length == 2) {
     sync = shallowEquity(expressionObjects);
     // console.log("sync:", sync + "%");
+  }
+}
+
+//   Function to display the values of the expressions
+function drawExpressionValues(e, expObj, index, i) {
+  const spacing = 20;
+  if (e != "asSortedArray") {
+    push();
+    let offX = 0;
+    let offY = (height / 3) * 2;
+    // offX = index == 0 ? width / 3 : (width / 3) * 2;
+    if (blobs[index].pos.x <= width / 2) offX = width / 10;
+    else if (blobs[index].pos.x > width / 2) offX = width - width / 8;
+
+    translate(offX, offY);
+    const _color = expressions[e].color;
+    let _value = round(expObj[e] * 10, 3);
+
+    if (isNaN(_value)) _value = 0;
+
+    _color.setAlpha(255);
+    fill(_color);
+    textSize(15);
+    textAlign(LEFT);
+    const nameExp = e.charAt(0).toUpperCase() + e.slice(1);
+    text(`${nameExp}: ` + _value, 0, spacing * i);
+    // i++;
+    _color.setAlpha(alpha);
+    pop();
   }
 }
 
@@ -240,12 +261,10 @@ function propertiesTransitions(o1, o2, lastTimestamp) {
   const now = Date.now();
   const interval = 1000;
   const amt = (now - lastTimestamp) / interval;
-  console.log("amt:", amt);
+  // console.log("amt:", amt);
 
   const c1 = o1.color;
-  console.log("c1:", c1);
   const c2 = o2.color;
-  console.log("c2:", c2);
 
   // let amt = 0; // da 0 a 1
   const lerped_color = lerpColor(c1, c2, amt);
