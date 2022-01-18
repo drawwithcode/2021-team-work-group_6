@@ -55,6 +55,7 @@ class Blob {
       o.move(this.pos);
       o.show(rough, color, change, offset);
       o.showText(e);
+      //  Blob già al centro?????
       // if ((this.pos.x = width / 2)) o.expand();
     });
   }
