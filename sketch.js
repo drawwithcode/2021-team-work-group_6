@@ -13,13 +13,11 @@ let sync = 0;
 let change = [0, 0];
 const alpha = 50;
 
-let expValues = [];
 let expressionObjects = [];
 let properties = [];
 let currIntensity = [];
 let currX = [];
 let blobs_creati = [];
-let X;
 
 let timeStamp = 0;
 
@@ -70,8 +68,8 @@ function setup() {
     },
     neutral: {
       color: color(89, 84, 87, alpha),
-      changeIncrement: 0.0,
-      offset: 0.0,
+      changeIncrement: 0.001,
+      offset: 0.001,
     },
   };
   // expressions = Object.keys(colors);
@@ -156,34 +154,36 @@ function getFaceElements() {
   detections.forEach((d, index) => {
     expressionObjects[index] = d.expressions;
     //  let  expKeys[index] = Object.keys(d.expressions);
-    expValues[index] = Object.values(d.expressions);
-    // console.table(expValues[index]);
 
-    let maxi = max(expValues[index]);
+    // let expValue = 0;
+    const valTreshold = 0.3;
     let i = 0;
 
     //  For magico per espressione corrente in testa
     for (const e in d.expressions) {
-      if (maxi == d.expressions[e]) {
+      //  Fix: neutrale per troppo tempo
+      //  Problema: quando tutto sotto soglia, bug!!!
+      const value = e === "neutral" ? d.expressions[e] * 0.4 : d.expressions[e];
+      if (value > valTreshold) {
         expression[index].prevExp = expression[index].nextExp;
         expression[index].nextExp = `${e}`;
         const prev = expression[index].prevExp;
         const next = expression[index].nextExp;
 
-        //  Fix: neutrale per troppo tempo
-        if (next == "neutral") currIntensity[index] = 0.1;
-        else currIntensity[index] = `${d.expressions[e]}`;
+        currIntensity[index] = value;
+        // if (next === "neutral") currIntensity[index] = 0.1;
+        // else currIntensity[index] = d.expressions[e];
         //  Assegno colore di expression attuale
         //  Posizione X di blob
         currX[index] = d.detection._box._x;
         if (currX[index] < 200) {
-          X = currX[index];
           blobs_creati[index] = 1;
         } else blobs_creati[index] = 0;
 
         //  Transizione fluida tra stati
         if (prev != next) {
-          console.log("TRANSITION");
+          console.log("%cTRANSITION!", "font-weight:bold; color:red");
+          console.log(`${prev} --> ${next}`);
           console.table(d.expressions);
           transition = true;
           timeStamp = Date.now();
@@ -200,13 +200,14 @@ function getFaceElements() {
         } else if (!transition) {
           properties[index].curr.color = expressions[next].color;
         }
+        // expValue = value;
       }
 
       //  Display expressions values
-      if (detections.length == 2) {
-        drawExpressionValues(e, d.expressions, index, i);
-        i++;
-      }
+      // if (detections.length == 2) {
+      drawExpressionValues(e, d.expressions, index, i);
+      i++;
+      // }
     }
   });
   if (detections.length == 2) {
@@ -222,9 +223,9 @@ function drawExpressionValues(e, expObj, index, i) {
     push();
     let offX = 0;
     let offY = (height / 3) * 2;
-    // offX = index == 0 ? width / 3 : (width / 3) * 2;
-    if (blobs[index].pos.x <= width / 2) offX = width / 10;
-    else if (blobs[index].pos.x > width / 2) offX = width - width / 8;
+    offX = currX[index] >= 200 ? width / 10 : width - width / 8;
+    // if (currX[index] >= 200) offX = width / 10;
+    // else offX = width - width / 8;
 
     translate(offX, offY);
     const _color = expressions[e].color;
