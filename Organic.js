@@ -57,8 +57,19 @@ class Organic {
     text(e, this.pos.x, this.pos.y);
   }
 
+  // expand() {
+  //   this.radius += 10;
+  // }
+
   expand() {
     this.radius += 10;
+
+    if (this.radius == 100) {
+      const nameExp = e.charAt(0).toUpperCase() + e.slice(1);
+      text(`${nameExp}: ` + _value, 0, spacing * i);
+    } else {
+      this.radius += 10;
+    }
   }
 
   // setting the particle in motion.
