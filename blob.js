@@ -54,9 +54,16 @@ class Blob {
     this.organics.forEach((o) => {
       o.move(this.pos);
       o.show(rough, color, change, offset);
-      o.showText(e);
-      //  Blob già al centro?????
-      // if ((this.pos.x = width / 2)) o.expand();
+      // o.showText(e);
+      //  10 secondi --> Pausa rilevazione --> Espando Blob --> cambio BG
+      if (blob_distance < 10) {
+        rileva = false;
+        if (o.radius < 800) o.expand();
+        else {
+          screen_2 = false;
+          screen_3 = true;
+        }
+      }
     });
   }
 
@@ -64,14 +71,17 @@ class Blob {
     // let dir = target - this.pos
     let force = p5.Vector.sub(target, this.pos);
     let d = force.mag();
+    d = constrain(d, 1, 100);
     const G = 50;
     const speed = 40;
     const strength = G / d;
-    d = constrain(d, 1, 100);
+
     // if (d < 20) force.mult(-force.mag());
     if ((d < 5 && intensity > 0.5) || detections.length < 2) this.vel.set(0, 0);
     else {
-      force.setMag((strength * intensity * speed) / (d * d));
+      if (intensity == 0) intensity = 0.1;
+      const mag = (strength * intensity * speed) / d;
+      force.setMag(mag);
       this.acc.add(force);
     }
     // if (d < 20) force.sub(-this.vel);

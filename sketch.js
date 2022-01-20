@@ -11,7 +11,7 @@ let a2;
 let sync = 0;
 // The variable change stores the rate of rotation and the y coordinate for noise later
 let change = [0, 0];
-const alpha = 50;
+const alpha = 70;
 
 let expressionObjects = [];
 let properties = [];
@@ -23,6 +23,8 @@ let timeStamp = 0;
 
 let expressions;
 let expression = [];
+
+let blob_distance = 1;
 
 let screen_1 = false;
 let screen_2 = true;
@@ -68,7 +70,7 @@ function setup() {
     },
     neutral: {
       color: color(89, 84, 87, alpha),
-      changeIncrement: 0.001,
+      changeIncrement: 0.01,
       offset: 0.001,
     },
   };
@@ -107,7 +109,10 @@ function setup() {
 
 function draw() {
   if (screen_2) drawScreen2();
+  else if (screen_3) drawScreen3();
 }
+
+let rileva = true;
 
 function drawScreen2() {
   background("black");
@@ -117,11 +122,16 @@ function drawScreen2() {
   point(a1.x, a1.y);
   point(a2.x, a2.y);
   if (detections) {
+    fill(255);
     textSize(20);
     noStroke();
     text("Faces detected: " + detections.length, 100, 100);
+    if (detections.length == 2) {
+      text("Syinc rate: " + sync + "%", width / 2, 100);
+    } else text("Not enough faces!", width / 2, 100);
     if (detections.length > 0) {
-      getFaceElements();
+      if (rileva) getFaceElements();
+      blob_distance = checkDistance(blobs);
       blobs_creati.forEach((b, index) => {
         let rough = currIntensity[index] * 10;
         //  Intensity of central point (-2, 2) --> 0-100%
@@ -142,10 +152,29 @@ function drawScreen2() {
         );
       });
     }
-    if (detections.length == 2) {
-      text("Syinc rate: " + sync + "%", width / 2, 100);
-    } else text("Not enough faces!", width / 2, 100);
   }
+}
+
+function drawScreen3() {
+  // background(properties[0].curr.color.setAlpha(255));
+  fill(255);
+  textSize(40);
+  noStroke();
+  textAlign(CENTER);
+  text(
+    `Congratulations!
+    You completed the experience!
+    Your expression: ${expression[0].nextExp}
+    Your sync: ${sync}%`,
+    width / 2,
+    height / 2
+  );
+}
+
+function checkDistance(_blobs) {
+  const f = p5.Vector.sub(_blobs[0].pos, _blobs[1].pos);
+  const d = f.mag();
+  return d;
 }
 
 function getFaceElements() {
