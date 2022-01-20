@@ -13,11 +13,14 @@ let sync = 0;
 let change = [0, 0];
 const alpha = 70;
 
+let bg_color = 0;
+
 let expressionObjects = [];
 let properties = [];
 let currIntensity = [];
 let currX = [];
 let blobs_creati = [];
+let exp_perc = {};
 
 let timeStamp = 0;
 
@@ -34,42 +37,45 @@ let blobCreati = false;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
-  background("black");
+  background(bg_color);
   frameRate(24);
+
+  textStyle(NORMAL);
+  textFont("lores-12");
 
   expressions = {
     disgusted: {
-      color: color(125, 223, 100, alpha),
+      color: color(125, 223, 100),
       changeIncrement: 0.004,
       offset: 0.03,
     },
     happy: {
-      color: color(230, 13, 100, alpha),
+      color: color(230, 13, 100),
       changeIncrement: 0.03,
       offset: 0.1,
     },
     angry: {
-      color: color(177, 15, 46, alpha),
+      color: color(177, 15, 46),
       changeIncrement: 0.08,
       offset: 0.9,
     },
     surprised: {
-      color: color(255, 107, 46, alpha),
+      color: color(255, 107, 46),
       changeIncrement: 0.01,
       offset: 0.3,
     },
     sad: {
-      color: color(77, 108, 250, alpha),
+      color: color(77, 108, 250),
       changeIncrement: 0.01,
       offset: 0.1,
     },
     fearful: {
-      color: color(154, 72, 208, alpha),
+      color: color(154, 72, 208),
       changeIncrement: 0.04,
       offset: 0.3,
     },
     neutral: {
-      color: color(89, 84, 87, alpha),
+      color: color(89, 84, 87),
       changeIncrement: 0.01,
       offset: 0.001,
     },
@@ -85,17 +91,17 @@ function setup() {
     };
     properties[j] = {
       prev: {
-        color: color(89, 84, 87, alpha),
+        color: color(89, 84, 87),
         changeIncrement: 0,
         offset: 0,
       },
       curr: {
-        color: color(89, 84, 87, alpha),
+        color: color(89, 84, 87),
         changeIncrement: 0,
         offset: 0,
       },
       next: {
-        color: color(89, 84, 87, alpha),
+        color: color(89, 84, 87),
         changeIncrement: 0,
         offset: 0,
       },
@@ -115,7 +121,7 @@ function draw() {
 let rileva = true;
 
 function drawScreen2() {
-  background("black");
+  background(bg_color);
   strokeWeight(4);
   stroke(0, 255, 0);
   point(a0.x, a0.y);
@@ -155,20 +161,75 @@ function drawScreen2() {
   }
 }
 
+let transition_bg = false;
 function drawScreen3() {
-  // background(properties[0].curr.color.setAlpha(255));
-  fill(255);
+  const final_exp = expression[0].nextExp;
+  if (!transition_bg) bg_color = expressions[final_exp].color;
+
+  push();
+  background(bg_color);
   textSize(40);
   noStroke();
   textAlign(CENTER);
+  fill(0);
   text(
     `Congratulations!
     You completed the experience!
-    Your expression: ${expression[0].nextExp}
+    Your expression: ${final_exp}
+    Your sync: ${sync}%`,
+    width / 2 + 1,
+    height / 4 + 1
+  );
+  fill(255);
+  text(
+    `Congratulations!
+    You completed the experience!
+    Your expression: ${final_exp}
     Your sync: ${sync}%`,
     width / 2,
-    height / 2
+    height / 4
   );
+
+  pop();
+  let i = 0;
+  for (const e in exp_perc) {
+    if (e != "neutral") {
+      textSize(20);
+      const fill_c = expressions[e].color;
+      fill_c.setAlpha(255);
+      const n = e.charAt(0).toUpperCase() + e.slice(1);
+      fill(0);
+      text(`${n}: ${exp_perc[e]}%`, width / 2 + 1, 25 * i + height / 2 + 1);
+      e == expression[0].nextExp ? fill(255) : fill(fill_c);
+      text(`${n}: ${exp_perc[e]}%`, width / 2, 25 * i + height / 2);
+    }
+
+    i++;
+  }
+
+  if (transition_bg) tansitionBG(bg_color, ts);
+}
+let ts;
+function mouseClicked() {
+  if (screen_3) {
+    transition_bg = true;
+    ts = Date.now();
+  }
+}
+
+//  Background color transition
+function tansitionBG(c1, timeStamp) {
+  const now = Date.now();
+  const interval = 1000;
+  const amt = (now - timeStamp) / interval;
+  const c2 = color(0);
+  bg_color = lerpColor(c1, c2, amt);
+
+  if (amt >= 1) {
+    transition_bg = false;
+    screen_3 = false;
+    screen_1 = true;
+  }
 }
 
 function checkDistance(_blobs) {
@@ -267,7 +328,7 @@ function drawExpressionValues(e, expObj, index, i) {
     textSize(15);
     textAlign(LEFT);
     const nameExp = e.charAt(0).toUpperCase() + e.slice(1);
-    text(`${nameExp}: ` + _value, 0, spacing * i);
+    if (e != "neutral") text(`${nameExp}: ` + _value, 0, spacing * i);
     // i++;
     _color.setAlpha(alpha);
     pop();
@@ -279,9 +340,12 @@ function shallowEquity(objects) {
   const keys = Object.keys(objects[0]);
   let diff = 0;
   for (let key of keys) {
-    diff += abs(objects[0][key] - objects[1][key]);
+    const delta = abs(objects[0][key] - objects[1][key]);
+    diff += delta;
+    exp_perc[key] = round(map(delta, 0, 1, 100, 0), 1);
   }
-
+  // Create object with % of every expression
+  // map(delta, 0,1, 100, 0)
   let perc = map(diff, 0, 2, 100, 0);
   return round(perc);
 }
