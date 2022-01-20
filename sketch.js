@@ -36,6 +36,8 @@ function setup() {
   createCanvas(windowWidth, windowHeight);
   background("black");
   frameRate(24);
+  textStyle(NORMAL);
+  textFont("lores-12");
 
   expressions = {
     disgusted: {
