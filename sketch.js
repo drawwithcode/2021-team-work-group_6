@@ -11,7 +11,7 @@ let a2;
 let sync = 0;
 // The variable change stores the rate of rotation and the y coordinate for noise later
 let change = [0, 0];
-const alpha = 70;
+const alpha = 50;
 
 let bg_color = 0;
 
@@ -20,6 +20,9 @@ let properties = [];
 let currIntensity = [];
 let currX = [];
 let blobs_creati = [];
+
+let startPositions = [];
+
 let exp_perc = {};
 
 let timeStamp = 0;
@@ -29,11 +32,12 @@ let expression = [];
 
 let blob_distance = 1;
 
-let screen_1 = false;
-let screen_2 = true;
+let screen_1 = true;
+let screen_2 = false;
 let screen_3 = false;
 let transition = false;
 let blobCreati = false;
+let grow = false;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -44,6 +48,8 @@ function setup() {
 
   textStyle(NORMAL);
   textFont("lores-12");
+
+  startPositions = [width / 3, (width / 3) * 2];
 
   expressions = {
     disgusted: {
@@ -79,7 +85,7 @@ function setup() {
     neutral: {
       color: color(89, 84, 87),
       changeIncrement: 0.01,
-      offset: 0.001,
+      offset: 0.005,
     },
   };
   // expressions = Object.keys(colors);
@@ -116,11 +122,25 @@ function setup() {
 }
 
 function draw() {
-  if (screen_2) drawScreen2();
+  if (screen_1) drawScreen1();
+  else if (screen_2) drawScreen2();
   else if (screen_3) drawScreen3();
 }
 
 let rileva = true;
+
+function drawScreen1() {
+  // console.log("%cScreen 1", "font-weight:bold; color: pink");
+  background(bg_color);
+  if (detections) {
+    manageBlobs();
+    if (detections.length == 0) {
+      fill(255);
+      text("Place yourself in front of the blob", width / 2, 100);
+    }
+    //  Faccio partire le azimazioni if detections.lenght == 2
+  }
+}
 
 function drawScreen2() {
   background(bg_color);
@@ -137,29 +157,73 @@ function drawScreen2() {
     if (detections.length == 2) {
       text("Syinc rate: " + sync + "%", width / 2, 100);
     } else text("Not enough faces!", width / 2, 100);
-    if (detections.length > 0) {
-      if (rileva) getFaceElements();
-      blob_distance = checkDistance(blobs);
-      blobs_creati.forEach((b, index) => {
-        let rough = currIntensity[index] * 10;
+
+    manageBlobs();
+    // if (detections.length > 0) {
+    //   if (rileva) getFaceElements();
+    //   blob_distance = checkDistance(blobs);
+    //   blobs_creati.forEach((b, index) => {
+    //     let rough = currIntensity[index] * 10;
+    //     //  Intensity of central point (-2, 2) --> 0-100%
+    //     let mappedI = map(sync, 0, 100, -2, 2);
+    //     let mappedI_2 = map(sync, 0, 100, 1, -1);
+    //     blobs[b].attracted(a0, mappedI);
+    //     if (b == 0) blobs[b].attracted(a1, mappedI_2);
+    //     else blobs[b].attracted(a2, mappedI_2);
+    //     blobs[b].update();
+    //     //  Speed of change
+    //     change[index] += properties[index].curr.changeIncrement;
+    //     blobs[b].show(
+    //       rough,
+    //       properties[index].curr.color,
+    //       change[index],
+    //       properties[index].curr.offset,
+    //       expression[index].nextExp
+    //     );
+    //   });
+    // }
+  }
+}
+
+function manageBlobs() {
+  if (detections.length > 0) {
+    if (rileva) getFaceElements();
+    blob_distance = checkDistance(blobs);
+    blobs_creati.forEach((b, index) => {
+      let rough = currIntensity[index] * 10;
+      if (screen_2) {
         //  Intensity of central point (-2, 2) --> 0-100%
         let mappedI = map(sync, 0, 100, -2, 2);
         let mappedI_2 = map(sync, 0, 100, 1, -1);
         blobs[b].attracted(a0, mappedI);
-        if (b == 0) blobs[b].attracted(a1, mappedI_2);
-        else blobs[b].attracted(a2, mappedI_2);
-        blobs[b].update();
-        //  Speed of change
-        change[index] += properties[index].curr.changeIncrement;
-        blobs[b].show(
-          rough,
-          properties[index].curr.color,
-          change[index],
-          properties[index].curr.offset,
-          expression[index].nextExp
-        );
-      });
-    }
+        b == 0
+          ? blobs[b].attracted(a1, mappedI_2)
+          : blobs[b].attracted(a2, mappedI_2);
+        blobs[b].update(); // Update blobs' postition
+      }
+      //  Speed of change
+      change[index] += properties[index].curr.changeIncrement;
+      blobs[b].show(
+        rough,
+        properties[index].curr.color,
+        change[index],
+        properties[index].curr.offset,
+        expression[index].nextExp
+      );
+    });
+  } else {
+    //Fa schifo, da rivedere --> Blobs neutri sempre 2!!!
+    blobs_creati.forEach((b, index) => {
+      let rough = 5;
+      change[index] += expressions.neutral.changeIncrement;
+      blobs[b].show(
+        rough,
+        expressions.neutral.color,
+        change[index],
+        expressions.neutral.offset,
+        "neutral"
+      );
+    });
   }
 }
 
@@ -217,6 +281,11 @@ function mouseClicked() {
     transition_bg = true;
     ts = Date.now();
   }
+
+  if (screen_1) {
+    screen_1 = false;
+    screen_2 = true;
+  }
 }
 
 //  Background color transition
@@ -231,6 +300,11 @@ function tansitionBG(c1, timeStamp) {
     transition_bg = false;
     screen_3 = false;
     screen_1 = true;
+    rileva = true;
+    blobs_creati.forEach((b, index) => {
+      const x = startPositions[index];
+      blobs[b].reset();
+    });
   }
 }
 
@@ -246,24 +320,21 @@ function getFaceElements() {
   detections.forEach((d, index) => {
     expressionObjects[index] = d.expressions;
 
-    //  let  expKeys[index] = Object.keys(d.expressions);
-
     // let expValue = 0;
-    const valTreshold = 0.3;
+    const valTreshold = 0.35;
     let i = 0;
 
     //  For magico per espressione corrente in testa
     for (const e in d.expressions) {
-      //  Fix: neutrale per troppo tempo
       //  Problema: quando tutto sotto soglia, bug!!!
       const value = e === "neutral" ? d.expressions[e] * 0.4 : d.expressions[e];
       if (value > valTreshold) {
         expression[index].prevExp = expression[index].nextExp;
-        expression[index].nextExp = `${e}`;
+        expression[index].nextExp = e;
         const prev = expression[index].prevExp;
         const next = expression[index].nextExp;
 
-        currIntensity[index] = value;
+        currIntensity[index] = d.expressions[e];
         // if (next === "neutral") currIntensity[index] = 0.1;
         // else currIntensity[index] = d.expressions[e];
         //  Assegno colore di expression attuale
@@ -292,21 +363,30 @@ function getFaceElements() {
           );
         } else if (!transition) {
           properties[index].curr.color = expressions[next].color;
+          properties[index].curr.color.setAlpha(alpha);
         }
         // expValue = value;
       }
 
       //  Display expressions values
       // if (detections.length == 2) {
-      drawExpressionValues(e, d.expressions, index, i);
-      i++;
+      if (screen_2) {
+        drawExpressionValues(e, d.expressions, index, i);
+        i++;
+      }
       // }
     }
   });
-  // if (detections.length == 2) {
-  //   sync = shallowEquity(expressionObjects);
-  //   // console.log("sync:", sync + "%");
-  // }
+
+  if (detections.length == 0)
+    expression.forEach((e) => {
+      e.nextExp = "neutral";
+    });
+
+  if (detections.length == 2) {
+    sync = shallowEquity(expressionObjects);
+    // console.log("sync:", sync + "%");
+  }
 }
 
 //   Function to display the values of the expressions
@@ -371,6 +451,8 @@ function propertiesTransitions(o1, o2, lastTimestamp) {
   const lerped_color = lerpColor(c1, c2, amt);
   const lerped_change = lerp(o1.changeIncrement, o2.changeIncrement, amt);
   const lerped_offset = lerp(o1.offset, o2.offset, amt);
+
+  lerped_color.setAlpha(alpha);
 
   const obj = {
     color: lerped_color,
