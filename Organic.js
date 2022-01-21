@@ -61,6 +61,19 @@ class Organic {
     this.radius += 10;
   }
 
+  grow() {
+    const speed = 0.1;
+    const incrementDelta = 5;
+    this.radius += (1 + this.id * incrementDelta) * speed;
+    console.log("this.radius:", this.radius);
+  }
+  reset() {
+    this.radius = 0;
+    this.off = 0;
+    this.roughness = this.id * 10;
+    this.angle = this.id * random(90);
+  }
+
   // setting the particle in motion.
   // https://p5js.org/examples/simulate-particles.html
 }

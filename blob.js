@@ -1,6 +1,7 @@
 class Blob {
   constructor(x, y) {
     this.pos = createVector(x, y);
+    this.grown = false;
     // this.prev = createVector(x, y);
     this.vel = createVector();
     this.acc = createVector();
@@ -10,7 +11,7 @@ class Blob {
       this.organics.push(
         new Organic(
           i,
-          1 + 20 * i,
+          0,
           this.pos,
           i * 10,
           i * random(90),
@@ -49,23 +50,32 @@ class Blob {
   }
 
   show(rough, color, change, offset, e) {
+    const r_min = 125;
     stroke(255);
     // point(this.pos.x, this.pos.y);
     this.organics.forEach((o) => {
-      o.move(this.pos);
+      if (screen_1 && !this.grown) o.grow();
+      if (o.radius > r_min) this.grown = true; // Far partire le animazioni
+
       o.show(rough, color, change, offset);
+
+      o.move(this.pos);
       // o.showText(e);
       //  10 secondi --> Pausa rilevazione --> Espando Blob --> cambio BG
       if (blob_distance < 10) {
         rileva = false;
-        if (o.radius < 800) o.expand();
+        if (o.radius < width) o.expand();
         else {
           screen_2 = false;
           screen_3 = true;
         }
       }
+
+      if (screen_3 && o.radius != 0) o.reset();
     });
   }
+
+  idle() {}
 
   attracted(target, intensity) {
     // let dir = target - this.pos
@@ -89,5 +99,14 @@ class Blob {
     //   force.mult(0);
     // }
     // this.acc.add(force);
+  }
+
+  //  I have to reset Position and Radius
+  //  Posizione non si resetta correttamente
+  reset() {
+    this.grown = false;
+    this.pos.x <= width / 2
+      ? (this.pos.x = startPositions[0])
+      : (this.pos.x = startPositions[1]);
   }
 }
