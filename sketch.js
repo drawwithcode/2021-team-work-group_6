@@ -17,7 +17,6 @@ const alpha = 50;
 
 let bg_color = 0;
 
-let expressionObjects = [];
 let properties = [];
 let currIntensity = [];
 let currX = [];
@@ -29,7 +28,7 @@ let exp_perc = {};
 
 let timeStamp = 0;
 
-let expressions;
+let expressions_properties;
 let expression = [];
 
 let blob_distance = 1;
@@ -51,7 +50,7 @@ function setup() {
 
   startPositions = [width / 3, (width / 3) * 2];
 
-  expressions = {
+  expressions_properties = {
     disgusted: {
       color: color(125, 223, 100),
       changeIncrement: 0.004,
@@ -101,28 +100,7 @@ function setInitialState() {
   //  Initializing objects and creating blobs
   blobs = [];
   for (let j = 0; j < 2; j++) {
-    blobs[j] = new Blob((j + 1) * (width / 3), height / 2);
-    expression[j] = {
-      prevExp: "neutral",
-      nextExp: "neutral",
-    };
-    properties[j] = {
-      prev: {
-        color: color(89, 84, 87),
-        changeIncrement: 0,
-        offset: 0,
-      },
-      curr: {
-        color: color(89, 84, 87),
-        changeIncrement: 0,
-        offset: 0,
-      },
-      next: {
-        color: color(89, 84, 87),
-        changeIncrement: 0,
-        offset: 0,
-      },
-    };
+    blobs[j] = new Blob(j, (j + 1) * (width / 3), height / 2);
   }
 }
 
@@ -177,8 +155,9 @@ function drawScreen2() {
   }
   // TODO Timer di log out e restart
 }
+
 /**
- * Function to manage the behaveiour of the blobs
+ * *Function to manage the behaveiour of the blobs
  * Check face parameters => {@link getFaceElements()}
  * Measure distance between blobs => {@link checkDistance()}
  */
@@ -186,52 +165,89 @@ function manageBlobs() {
   if (detections.length > 0) {
     if (rileva) getFaceElements();
     blob_distance = checkDistance(blobs);
-    blobs_creati.forEach((b, index) => {
-      const roughness = currIntensity[index] * 10;
+
+    let b_index = 0;
+    //  Blobs[0] --> x: width/3   --> "left" --> 0
+    //  Blobs[1] --> x: width/3*2; --> "right" --> 1
+
+    blobs.forEach((b, index) => {
+      const side = b.side;
+      let altro = "";
+      // console.log(`${side} --> ${index}: ${b.pos.x}`);
+
+      b.neutral = false;
+      if (screen_1) {
+        if (side == "left") {
+          b.pos.x = startPositions[0];
+          index = 0;
+          altro = "right";
+        } else if (side == "right") {
+          b.pos.x = startPositions[1];
+          index = 1;
+          altro = "left";
+        }
+      }
+
+      if (detections.length == 1) {
+        b_index = side == "left" ? 0 : 1;
+        blobs[1].side = altro;
+        blobs[1].neutral = true;
+      }
+
+      // const roughness = currIntensity[index] * 10;
+      const roughness = blobs[index].intensity * 10;
+
       if (screen_2) {
         //* Intensity of central point (-2, 2) --> 0-100%
         let mappedI = map(sync, 0, 100, -2, 2);
         let mappedI_2 = map(sync, 0, 100, 1, -1);
-        blobs[b].attracted(a0, mappedI);
-        b == 0
-          ? blobs[b].attracted(a1, mappedI_2)
-          : blobs[b].attracted(a2, mappedI_2);
-        blobs[b].update(); //* Update blobs' postition
+        blobs[index].attracted(a0, mappedI);
+        blobs[index] == 0
+          ? blobs[index].attracted(a1, mappedI_2)
+          : blobs[index].attracted(a2, mappedI_2);
+        blobs[index].update(); //* Update blobs' postition
       }
       //* Speed of change
-      change[index] += properties[index].curr.changeIncrement;
-      blobs[b].showBlobs(
-        roughness,
-        properties[index].curr.color,
-        change[index],
-        properties[index].curr.offset,
-        expression[index].nextExp
-      );
+      change[index] += blobs[index].properties.changeIncrement;
+      if (!blobs[index].neutral) {
+        blobs[index].showBlobs(
+          roughness,
+          blobs[index].properties.color,
+          change[index],
+          blobs[index].properties.offset,
+          blobs[index].expressions.next
+        );
+      } else drawNeutral(b_index);
     });
+
+    // if (detections.length == 1) drawNeutral(b_index);
   } else {
-    //TODO Fa schifo, da rivedere --> Blobs neutri sempre 2!!!
-    //  !Quando c'è una sola faccia, mostrare l'altro blob neutro
-    for (let i = 0; i < blobs.length; i++) {
-      const neutral_c = expressions.neutral.color;
-      neutral_c.setAlpha(alpha);
-      const roughness = 5;
-      change[i] += expressions.neutral.changeIncrement;
-      blobs[i].showBlobs(
-        roughness,
-        neutral_c,
-        change[i],
-        expressions.neutral.offset,
-        "neutral"
-      );
-    }
+    for (let i = 0; i < blobs.length; i++) drawNeutral(i);
   }
+}
+
+/**
+ * Function that draws a neutral blob as a placeholder
+ */
+function drawNeutral(index) {
+  const roughness = 5;
+  const neutral_c = expressions_properties.neutral.color;
+  neutral_c.setAlpha(alpha);
+  change[index] += expressions_properties.neutral.changeIncrement;
+  blobs[index].showBlobs(
+    roughness,
+    neutral_c,
+    change[index],
+    expressions_properties.neutral.offset,
+    "neutral"
+  );
 }
 
 let transition_bg = false;
 let sync_printed = 0;
 function drawScreen3() {
-  const final_exp = expression[0].nextExp;
-  if (!transition_bg) bg_color = expressions[final_exp].color;
+  const final_exp = blobs[0].expressions.next;
+  if (!transition_bg) bg_color = expressions_properties[final_exp].color;
   for (let i = 0; i < 10; i++) if (sync_printed <= sync) sync_printed += 0.1;
   const rounded_sync = floor(sync_printed, 1);
   push();
@@ -263,12 +279,12 @@ function drawScreen3() {
   for (const e in exp_perc) {
     if (e != "neutral") {
       textSize(20);
-      const fill_c = expressions[e].color;
+      const fill_c = expressions_properties[e].color;
       fill_c.setAlpha(255);
       const n = e.charAt(0).toUpperCase() + e.slice(1);
       fill(0);
       text(`${n}: ${exp_perc[e]}%`, width / 2 + 1, 25 * i + height / 2 + 1);
-      e == expression[0].nextExp ? fill(255) : fill(fill_c);
+      e == blobs[0].expressions.next ? fill(255) : fill(fill_c);
       text(`${n}: ${exp_perc[e]}%`, width / 2, 25 * i + height / 2);
     }
 
@@ -314,35 +330,37 @@ function checkDistance(_blobs) {
   return d;
 }
 
+let prevProp = {};
+let nextProp = {};
+
 function getFaceElements() {
   //* Per ogni faccia rilevata
   blobs_creati = [];
   detections.forEach((d, index) => {
-    expressionObjects[index] = d.expressions;
+    currX[index] = d.detection._box._x;
+    // console.table(currX);
+    blobs[index].side = currX[index] > 200 ? "left" : "right";
 
-    //// let expValue = 0;
-    const valTreshold = 0.35;
+    blobs[index].expressionList = d.expressions;
+
+    let expValue = 0;
+    const valTreshold = 0.05;
     let i = 0;
 
     //*  For magico per espressione corrente in testa
     for (const e in d.expressions) {
       //  ! Problema: quando tutto sotto soglia, non appaiono le facce
-      const value = e === "neutral" ? d.expressions[e] * 0.4 : d.expressions[e];
+      const value = e === "neutral" ? d.expressions[e] * 0.1 : d.expressions[e];
       if (value > valTreshold) {
-        expression[index].prevExp = expression[index].nextExp;
-        expression[index].nextExp = e;
-        const prev = expression[index].prevExp;
-        const next = expression[index].nextExp;
+        blobs[index].expressions.prev = blobs[index].expressions.next;
+        blobs[index].expressions.next = e;
+        // expression[index].prevExp = expression[index].nextExp;
+        // expression[index].nextExp = e;
+        const prev = blobs[index].expressions.prev;
+        const next = blobs[index].expressions.next;
 
-        currIntensity[index] = d.expressions[e];
-        // // if (next === "neutral") currIntensity[index] = 0.1;
-        // // else currIntensity[index] = d.expressions[e];
-        // //  Assegno colore di expression attuale
-        //*  Posizione X di blob
-        currX[index] = d.detection._box._x;
-        if (currX[index] < 200) {
-          blobs_creati[index] = 1;
-        } else blobs_creati[index] = 0;
+        // expValue = value;
+        blobs[index].intensity = d.expressions[e];
 
         //*  Transizione fluida tra stati
         if (prev != next) {
@@ -351,21 +369,20 @@ function getFaceElements() {
           console.table(d.expressions);
           transition = true;
           timeStamp = Date.now();
-          properties[index].prev = expressions[prev];
-          properties[index].next = expressions[next];
+          prevProp = expressions_properties[prev];
+          nextProp = expressions_properties[next];
         }
 
         if (transition) {
-          properties[index].curr = propertiesTransitions(
-            properties[index].prev,
-            properties[index].next,
+          blobs[index].properties = propertiesTransitions(
+            prevProp,
+            nextProp,
             timeStamp
           );
         } else if (!transition) {
-          properties[index].curr.color = expressions[next].color;
-          properties[index].curr.color.setAlpha(alpha);
+          blobs[index].properties.color = expressions_properties[next].color;
+          blobs[index].properties.color.setAlpha(alpha);
         }
-        // expValue = value;
       }
 
       //  Display expressions values
@@ -378,13 +395,15 @@ function getFaceElements() {
     }
   });
 
+  //  ?Funziona?
   if (detections.length == 0)
     expression.forEach((e) => {
       e.nextExp = "neutral";
     });
 
   if (detections.length == 2) {
-    sync = shallowEquity(expressionObjects);
+    //  TODO Ottimizzare sta roba
+    sync = shallowEquity(blobs[0].expressionList, blobs[1].expressionList);
     // console.log("sync:", sync + "%");
   }
 }
@@ -407,7 +426,7 @@ function drawExpressionValues(e, expObj, index, i) {
     // else offX = width - width / 8;
 
     translate(offX, offY);
-    const _color = expressions[e].color;
+    const _color = expressions_properties[e].color;
     let _value = round(expObj[e] * 10, 3);
 
     if (isNaN(_value)) _value = 0;
@@ -429,15 +448,15 @@ function drawExpressionValues(e, expObj, index, i) {
  * @param {*} objects
  * @returns
  */
-function shallowEquity(objects) {
-  const keys = Object.keys(objects[0]);
+function shallowEquity(obj1, obj2) {
+  const keys = Object.keys(obj1);
   let diff = 0;
   for (let key of keys) {
-    const delta = abs(objects[0][key] - objects[1][key]);
+    const delta = abs(obj1[key] - obj2[key]);
     diff += delta;
     exp_perc[key] = round(map(delta, 0, 1, 100, 0), 1);
   }
-  // Create object with % of every expression
+  // *Create object with % of every expression
   // map(delta, 0,1, 100, 0)
   let perc = map(diff, 0, 2, 100, 0);
   return round(perc, 1);
@@ -454,13 +473,14 @@ function propertiesTransitions(o1, o2, lastTimestamp) {
   const now = Date.now();
   const interval = 1000;
   const amt = (now - lastTimestamp) / interval;
-  // console.log("amt:", amt);
+  console.log("amt:", amt);
 
   const c1 = o1.color;
   const c2 = o2.color;
 
   // let amt = 0; // da 0 a 1
   const lerped_color = lerpColor(c1, c2, amt);
+  console.log("lerped_color:", lerped_color);
   const lerped_change = lerp(o1.changeIncrement, o2.changeIncrement, amt);
   const lerped_offset = lerp(o1.offset, o2.offset, amt);
 
