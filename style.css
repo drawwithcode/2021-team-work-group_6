@@ -2,8 +2,37 @@ html,
 body {
   margin: 0;
   padding: 0;
+  font-family: lores-12, sans-serif;
+  font-weight: 400;
+  font-style: normal;
+
 }
 
 canvas {
   display: block;
 }
+
+#outer {
+  overflow: hidden;
+}
+
+#outer div {
+  display: inline-block;
+}
+
+#loop {
+  white-space: nowrap;
+  animation: loop-anim 5s linear infinite;
+}
+
+
+
+@keyframes loop-anim {
+  0% {
+      margin-left: 0;
+  }
+  100% {
+      margin-left: -50% /* This works because of the div between "outer" and "loop" */
+  }
+}
+
