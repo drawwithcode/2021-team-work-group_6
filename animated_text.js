@@ -1,18 +1,15 @@
-// animationscrolltexts
-let outer = document.querySelector("#outer");
-let content = outer.querySelector("#content");
-
-repeatContent(content, outer.offsetWidth);
-
-let el = outer.querySelector("#loop");
-el.innerHTML = el.innerHTML + el.innerHTML;
-
-function repeatContent(el, till) {
-  let html = el.innerHTML;
-  let counter = 0; // prevents infinite loop
-
-  while (el.offsetWidth < till && counter < 100) {
-    el.innerHTML += html;
-    counter += 1;
+// *Animation Scroll Texts
+const frase = "PLEASE STAND IN FRONT OF YOUR BLOB ●&nbsp;";
+let content = document.getElementsByClassName("loop");
+content.forEach((c) => {
+  repeatContent(c, c.offsetWidth);
+  function repeatContent(el) {
+    // let html = el.innerHTML;
+    let counter = 0; // prevents infinite loop
+    const max_testi = 10;
+    while (counter < max_testi) {
+      el.innerHTML += frase;
+      counter += 1;
+    }
   }
-}
+});

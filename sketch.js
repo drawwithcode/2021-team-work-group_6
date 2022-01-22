@@ -13,22 +13,12 @@ let sync = 0;
 // The variable change stores the rate of rotation and the y coordinate for noise later
 let change = [0, 0];
 const alpha = 50;
-
 let bg_color = 0;
-
-let properties = [];
-let currIntensity = [];
 let currX = [];
-let blobs_creati = [];
-
 let startPositions = [];
-
 let exp_perc = {};
-
 let timeStamp = 0;
-
 let expressions_properties;
-let expression = [];
 
 let blob_distance = 1;
 
@@ -98,7 +88,8 @@ function setup() {
   a2 = createVector(width - 100, height / 2);
 
   //HTML
-  div_scroll = select("#outer");
+  div_scroll = [select("#top"), select("#bottom")];
+  console.log("div_scroll:", div_scroll);
 }
 
 function setInitialState() {
@@ -127,7 +118,10 @@ let rileva = true;
  */
 function drawScreen1() {
   background(bg_color);
-  div_scroll.show();
+  div_scroll.forEach((d) => {
+    d.show();
+  });
+
   if (detections) {
     manageBlobs();
     if (detections.length < 2) {
@@ -142,7 +136,9 @@ function drawScreen1() {
 }
 
 function drawScreen2() {
-  div_scroll.hide();
+  div_scroll.forEach((d) => {
+    d.hide();
+  });
   background(bg_color);
   strokeWeight(4);
   stroke(0, 255, 0);
@@ -201,7 +197,6 @@ function manageBlobs() {
         blobs[1].neutral = true;
       }
 
-      // const roughness = currIntensity[index] * 10;
       const roughness = blobs[index].intensity * 10;
 
       if (screen_2) {
@@ -344,10 +339,8 @@ let nextProp = {};
 
 function getFaceElements() {
   //* Per ogni faccia rilevata
-  blobs_creati = [];
   detections.forEach((d, index) => {
     currX[index] = d.detection._box._x;
-    // console.table(currX);
     blobs[index].side = currX[index] > 200 ? "left" : "right";
 
     blobs[index].expressionList = d.expressions;
@@ -363,8 +356,6 @@ function getFaceElements() {
       if (value > valTreshold) {
         blobs[index].expressions.prev = blobs[index].expressions.next;
         blobs[index].expressions.next = e;
-        // expression[index].prevExp = expression[index].nextExp;
-        // expression[index].nextExp = e;
         const prev = blobs[index].expressions.prev;
         const next = blobs[index].expressions.next;
 
@@ -404,11 +395,11 @@ function getFaceElements() {
     }
   });
 
-  //  ?Funziona?
-  if (detections.length == 0)
-    expression.forEach((e) => {
-      e.nextExp = "neutral";
-    });
+  // //  ?Funziona?
+  // if (detections.length == 0)
+  //   expression.forEach((e) => {
+  //     e.nextExp = "neutral";
+  //   });
 
   if (detections.length == 2) {
     //  TODO Ottimizzare sta roba
@@ -431,8 +422,6 @@ function drawExpressionValues(e, expObj, index, i) {
     let offX = 0;
     let offY = (height / 3) * 2;
     offX = currX[index] >= 200 ? width / 10 : width - width / 8;
-    // if (currX[index] >= 200) offX = width / 10;
-    // else offX = width - width / 8;
 
     translate(offX, offY);
     const _color = expressions_properties[e].color;
