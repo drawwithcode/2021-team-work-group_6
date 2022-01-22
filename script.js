@@ -33,8 +33,8 @@ if (rileva) {
           new faceapi.TinyFaceDetectorOptions({ inputSize: 416 })
         )
         .withFaceExpressions();
-      // console.log("detections:", detections);
+      console.log("detections:", detections);
       canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
     }, 1000);
   });
-}
+} else detections = [];

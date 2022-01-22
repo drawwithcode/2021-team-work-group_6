@@ -1,17 +1,22 @@
 class Blob {
   constructor(x, y) {
     this.pos = createVector(x, y);
+    this.startPosition = createVector(x, y);
     this.grown = false;
     // this.prev = createVector(x, y);
     this.vel = createVector();
     this.acc = createVector();
     this.organics = [];
     this.n_blobs = 10;
+    this.createOrganics();
+  }
+
+  createOrganics() {
     for (let i = 0; i < this.n_blobs; i++) {
       this.organics.push(
         new Organic(
           i,
-          0,
+          10,
           this.pos,
           i * 10,
           i * random(90),
@@ -49,20 +54,18 @@ class Blob {
     }
   }
 
-  show(rough, color, change, offset, e) {
+  showBlobs(rough, color, change, offset, e) {
     const r_min = 125;
     stroke(255);
     // point(this.pos.x, this.pos.y);
     this.organics.forEach((o) => {
-      if (screen_1 && !this.grown) o.grow();
-      if (o.radius > r_min) this.grown = true; // Far partire le animazioni
-
-      o.show(rough, color, change, offset);
-
+      if (screen_1 && !this.grown && detections.length > 0) o.grow();
+      if (o.radius > r_min) this.grown = true; // TODO Far partire le animazioni
+      o.showOrganics(rough, color, change, offset);
       o.move(this.pos);
       // o.showText(e);
-      //  10 secondi --> Pausa rilevazione --> Espando Blob --> cambio BG
-      if (blob_distance < 10) {
+      //  TODO 10 secondi --> Pausa rilevazione --> Espando Blob --> cambio BG
+      if (screen_2 && blob_distance < 10) {
         rileva = false;
         if (o.radius < width) o.expand();
         else {
@@ -70,8 +73,6 @@ class Blob {
           screen_3 = true;
         }
       }
-
-      if (screen_3 && o.radius != 0) o.reset();
     });
   }
 
@@ -87,6 +88,7 @@ class Blob {
     const strength = G / d;
 
     // if (d < 20) force.mult(-force.mag());
+    //  ! Sometimes the blob breaks goes over the attraction point
     if ((d < 5 && intensity > 0.5) || detections.length < 2) this.vel.set(0, 0);
     else {
       if (intensity == 0) intensity = 0.1;
@@ -99,14 +101,5 @@ class Blob {
     //   force.mult(0);
     // }
     // this.acc.add(force);
-  }
-
-  //  I have to reset Position and Radius
-  //  Posizione non si resetta correttamente
-  reset() {
-    this.grown = false;
-    this.pos.x <= width / 2
-      ? (this.pos.x = startPositions[0])
-      : (this.pos.x = startPositions[1]);
   }
 }

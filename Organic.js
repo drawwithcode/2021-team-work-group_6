@@ -15,7 +15,7 @@ class Organic {
     this.pos = v;
   }
 
-  show(_rough, _color, _change, _offset) {
+  showOrganics(_rough, _color, _change, _offset) {
     noStroke(); // no stroke for the circle
     this.color = _color;
     this.roughness = _rough * 10;
@@ -73,16 +73,10 @@ class Organic {
   }
 
   grow() {
-    const speed = 0.1;
+    const speed = 0.05;
     const incrementDelta = 5;
     this.radius += (1 + this.id * incrementDelta) * speed;
-    console.log("this.radius:", this.radius);
-  }
-  reset() {
-    this.radius = 0;
-    this.off = 0;
-    this.roughness = this.id * 10;
-    this.angle = this.id * random(90);
+    // // console.log("this.radius:", this.radius);
   }
 
   // setting the particle in motion.

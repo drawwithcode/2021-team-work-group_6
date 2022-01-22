@@ -1,9 +1,11 @@
 // organic is used to store the list of instances of Organic objects that we will create
 let blobs = [];
-// Daniel Shiffman
-// http://codingtra.in
-// Attraction / Repulsion
-// Video: https://youtu.be/OAcXnzRNiCY
+/**
+ * Daniel Shiffman
+ * http://codingtra.in
+ * Attraction / Repulsion
+ * Video: https://youtu.be/OAcXnzRNiCY
+ */
 let a0;
 let a1;
 let a2;
@@ -88,9 +90,18 @@ function setup() {
       offset: 0.005,
     },
   };
-  // expressions = Object.keys(colors);
+  //// expressions = Object.keys(colors);
 
+  setInitialState();
+
+  a0 = createVector(width / 2, height / 2);
+  a1 = createVector(100, height / 2);
+  a2 = createVector(width - 100, height / 2);
+}
+
+function setInitialState() {
   //  Initializing objects and creating blobs
+  blobs = [];
   for (let j = 0; j < 2; j++) {
     blobs[j] = new Blob((j + 1) * (width / 3), height / 2);
     expression[j] = {
@@ -115,12 +126,13 @@ function setup() {
       },
     };
   }
-
-  a0 = createVector(width / 2, height / 2);
-  a1 = createVector(100, height / 2);
-  a2 = createVector(width - 100, height / 2);
 }
 
+/**
+ * Screen 1 => {@link drawScreen1()}
+ * Screen 2 => {@link drawScreen2()}
+ * Screen 3 => {@link drawScreen3()}
+ */
 function draw() {
   if (screen_1) drawScreen1();
   else if (screen_2) drawScreen2();
@@ -129,16 +141,21 @@ function draw() {
 
 let rileva = true;
 
+/**
+ * Linked to {@link manageBlobs()}
+ */
 function drawScreen1() {
-  // console.log("%cScreen 1", "font-weight:bold; color: pink");
   background(bg_color);
   if (detections) {
     manageBlobs();
-    if (detections.length == 0) {
+    if (detections.length < 2) {
       fill(255);
       text("Place yourself in front of the blob", width / 2, 100);
     }
-    //  Faccio partire le azimazioni if detections.lenght == 2
+    //  TODO Faccio partire le azimazioni if detections.lenght == 2
+  } else {
+    fill(255);
+    text("Loading the face recognition...", width / 2, 100);
   }
 }
 
@@ -159,52 +176,34 @@ function drawScreen2() {
     } else text("Not enough faces!", width / 2, 100);
 
     manageBlobs();
-    // if (detections.length > 0) {
-    //   if (rileva) getFaceElements();
-    //   blob_distance = checkDistance(blobs);
-    //   blobs_creati.forEach((b, index) => {
-    //     let rough = currIntensity[index] * 10;
-    //     //  Intensity of central point (-2, 2) --> 0-100%
-    //     let mappedI = map(sync, 0, 100, -2, 2);
-    //     let mappedI_2 = map(sync, 0, 100, 1, -1);
-    //     blobs[b].attracted(a0, mappedI);
-    //     if (b == 0) blobs[b].attracted(a1, mappedI_2);
-    //     else blobs[b].attracted(a2, mappedI_2);
-    //     blobs[b].update();
-    //     //  Speed of change
-    //     change[index] += properties[index].curr.changeIncrement;
-    //     blobs[b].show(
-    //       rough,
-    //       properties[index].curr.color,
-    //       change[index],
-    //       properties[index].curr.offset,
-    //       expression[index].nextExp
-    //     );
-    //   });
-    // }
   }
+  // TODO Timer di log out e restart
 }
-
+/**
+ * Function to manage the behaveiour of the blobs
+ * Check face parameters => {@link getFaceElements()}
+ * Measure distance between blobs => {@link checkDistance()}
+ */
 function manageBlobs() {
   if (detections.length > 0) {
     if (rileva) getFaceElements();
     blob_distance = checkDistance(blobs);
     blobs_creati.forEach((b, index) => {
-      let rough = currIntensity[index] * 10;
+      const roughness = currIntensity[index] * 10;
       if (screen_2) {
-        //  Intensity of central point (-2, 2) --> 0-100%
+        //* Intensity of central point (-2, 2) --> 0-100%
         let mappedI = map(sync, 0, 100, -2, 2);
         let mappedI_2 = map(sync, 0, 100, 1, -1);
         blobs[b].attracted(a0, mappedI);
         b == 0
           ? blobs[b].attracted(a1, mappedI_2)
           : blobs[b].attracted(a2, mappedI_2);
-        blobs[b].update(); // Update blobs' postition
+        blobs[b].update(); //* Update blobs' postition
       }
-      //  Speed of change
+      //* Speed of change
       change[index] += properties[index].curr.changeIncrement;
-      blobs[b].show(
-        rough,
+      blobs[b].showBlobs(
+        roughness,
         properties[index].curr.color,
         change[index],
         properties[index].curr.offset,
@@ -212,26 +211,31 @@ function manageBlobs() {
       );
     });
   } else {
-    //Fa schifo, da rivedere --> Blobs neutri sempre 2!!!
-    blobs_creati.forEach((b, index) => {
-      let rough = 5;
-      change[index] += expressions.neutral.changeIncrement;
-      blobs[b].show(
-        rough,
-        expressions.neutral.color,
-        change[index],
+    //TODO Fa schifo, da rivedere --> Blobs neutri sempre 2!!!
+    //  !Quando c'è una sola faccia, mostrare l'altro blob neutro
+    for (let i = 0; i < blobs.length; i++) {
+      const neutral_c = expressions.neutral.color;
+      neutral_c.setAlpha(alpha);
+      const roughness = 5;
+      change[i] += expressions.neutral.changeIncrement;
+      blobs[i].showBlobs(
+        roughness,
+        neutral_c,
+        change[i],
         expressions.neutral.offset,
         "neutral"
       );
-    });
+    }
   }
 }
 
 let transition_bg = false;
+let sync_printed = 0;
 function drawScreen3() {
   const final_exp = expression[0].nextExp;
   if (!transition_bg) bg_color = expressions[final_exp].color;
-
+  for (let i = 0; i < 10; i++) if (sync_printed <= sync) sync_printed += 0.1;
+  const rounded_sync = floor(sync_printed, 1);
   push();
   background(bg_color);
   textSize(40);
@@ -242,7 +246,7 @@ function drawScreen3() {
     `Congratulations!
     You completed the experience!
     Your expression: ${final_exp}
-    Your sync: ${sync}%`,
+    Your sync: ${rounded_sync}%`,
     width / 2 + 1,
     height / 4 + 1
   );
@@ -251,7 +255,7 @@ function drawScreen3() {
     `Congratulations!
     You completed the experience!
     Your expression: ${final_exp}
-    Your sync: ${sync}%`,
+    Your sync: ${rounded_sync}%`,
     width / 2,
     height / 4
   );
@@ -279,7 +283,9 @@ let ts;
 function mouseClicked() {
   if (screen_3) {
     transition_bg = true;
+    sync_printed = 0;
     ts = Date.now();
+    setInitialState();
   }
 
   if (screen_1) {
@@ -288,7 +294,7 @@ function mouseClicked() {
   }
 }
 
-//  Background color transition
+//* Background color transition
 function tansitionBG(c1, timeStamp) {
   const now = Date.now();
   const interval = 1000;
@@ -301,10 +307,6 @@ function tansitionBG(c1, timeStamp) {
     screen_3 = false;
     screen_1 = true;
     rileva = true;
-    blobs_creati.forEach((b, index) => {
-      const x = startPositions[index];
-      blobs[b].reset();
-    });
   }
 }
 
@@ -315,18 +317,18 @@ function checkDistance(_blobs) {
 }
 
 function getFaceElements() {
-  //  Per ogni faccia rilevata
+  //* Per ogni faccia rilevata
   blobs_creati = [];
   detections.forEach((d, index) => {
     expressionObjects[index] = d.expressions;
 
-    // let expValue = 0;
+    //// let expValue = 0;
     const valTreshold = 0.35;
     let i = 0;
 
-    //  For magico per espressione corrente in testa
+    //*  For magico per espressione corrente in testa
     for (const e in d.expressions) {
-      //  Problema: quando tutto sotto soglia, bug!!!
+      //  ! Problema: quando tutto sotto soglia, non appaiono le facce
       const value = e === "neutral" ? d.expressions[e] * 0.4 : d.expressions[e];
       if (value > valTreshold) {
         expression[index].prevExp = expression[index].nextExp;
@@ -335,16 +337,16 @@ function getFaceElements() {
         const next = expression[index].nextExp;
 
         currIntensity[index] = d.expressions[e];
-        // if (next === "neutral") currIntensity[index] = 0.1;
-        // else currIntensity[index] = d.expressions[e];
-        //  Assegno colore di expression attuale
-        //  Posizione X di blob
+        // // if (next === "neutral") currIntensity[index] = 0.1;
+        // // else currIntensity[index] = d.expressions[e];
+        // //  Assegno colore di expression attuale
+        //*  Posizione X di blob
         currX[index] = d.detection._box._x;
         if (currX[index] < 200) {
           blobs_creati[index] = 1;
         } else blobs_creati[index] = 0;
 
-        //  Transizione fluida tra stati
+        //*  Transizione fluida tra stati
         if (prev != next) {
           console.log("%cTRANSITION!", "font-weight:bold; color:red");
           console.log(`${prev} --> ${next}`);
@@ -389,7 +391,13 @@ function getFaceElements() {
   }
 }
 
-//   Function to display the values of the expressions
+/**
+ * *Function to display the values of the expressions
+ * @param {String} e
+ * @param {Object} expObj
+ * @param {*} index
+ * @param {*} i
+ */
 function drawExpressionValues(e, expObj, index, i) {
   const spacing = 20;
   if (e != "asSortedArray") {
@@ -423,7 +431,11 @@ function drawExpressionValues(e, expObj, index, i) {
   }
 }
 
-//  shallowEquity tra i due oggetti--> Misurare Delta per ogni espressione--> Sottrarre Delta da TOT--> Mapparlo al 100%
+/**
+ * *shallowEquity tra i due oggetti--> Misurare Delta per ogni espressione--> Sottrarre Delta da TOT--> Mapparlo al 100%
+ * @param {*} objects
+ * @returns
+ */
 function shallowEquity(objects) {
   const keys = Object.keys(objects[0]);
   let diff = 0;
@@ -435,9 +447,16 @@ function shallowEquity(objects) {
   // Create object with % of every expression
   // map(delta, 0,1, 100, 0)
   let perc = map(diff, 0, 2, 100, 0);
-  return round(perc);
+  return round(perc, 1);
 }
 
+/**
+ * *Transition between the properties of two objects
+ * @param {Object} o1
+ * @param {Object} o2
+ * @param {*} lastTimestamp
+ * @returns {Object}
+ */
 function propertiesTransitions(o1, o2, lastTimestamp) {
   const now = Date.now();
   const interval = 1000;
