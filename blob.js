@@ -1,14 +1,27 @@
 class Blob {
-  constructor(x, y) {
+  constructor(id, x, y) {
+    this.id = id;
     this.pos = createVector(x, y);
     this.startPosition = createVector(x, y);
     this.grown = false;
-    // this.prev = createVector(x, y);
     this.vel = createVector();
     this.acc = createVector();
     this.organics = [];
     this.n_blobs = 10;
     this.createOrganics();
+
+    this.intensity = 0;
+    this.expressions = { prev: "neutral", next: "neutral" };
+    this.properties = {
+      color: color(89, 84, 87),
+      changeIncrement: 0,
+      offset: 0,
+    };
+
+    this.side = "";
+    this.expressionList = {};
+
+    this.neutral = false;
   }
 
   createOrganics() {
@@ -20,7 +33,7 @@ class Blob {
           this.pos,
           i * 10,
           i * random(90),
-          expressions.neutral.color
+          expressions_properties.neutral.color
         )
       );
     }
