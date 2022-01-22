@@ -1,3 +1,8 @@
+* {
+  font-family: lores-12, sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
 html,
 body {
   margin: 0;
@@ -6,4 +11,26 @@ body {
 
 canvas {
   display: block;
+}
+
+#outer {
+  overflow: hidden;
+}
+
+#outer div {
+  display: inline-block;
+}
+
+#loop {
+  white-space: nowrap;
+  animation: loop-anim 100s linear infinite;
+}
+
+@keyframes loop-anim {
+  0% {
+    margin-left: 0;
+  }
+  100% {
+    margin-left: -50%; /* This works because of the div between "outer" and "loop" */
+  }
 }

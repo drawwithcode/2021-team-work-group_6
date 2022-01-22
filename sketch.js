@@ -1,15 +1,14 @@
-// organic is used to store the list of instances of Organic objects that we will create
-let blobs = [];
 /**
  * Daniel Shiffman
  * http://codingtra.in
  * Attraction / Repulsion
  * Video: https://youtu.be/OAcXnzRNiCY
  */
+// organic is used to store the list of instances of Organic objects that we will create
+let blobs = [];
 let a0;
 let a1;
 let a2;
-
 let sync = 0;
 // The variable change stores the rate of rotation and the y coordinate for noise later
 let change = [0, 0];
@@ -39,6 +38,9 @@ let screen_3 = false;
 let transition = false;
 let blobCreati = false;
 let grow = false;
+
+//  HTML Elements
+let div_scroll;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -94,6 +96,9 @@ function setup() {
   a0 = createVector(width / 2, height / 2);
   a1 = createVector(100, height / 2);
   a2 = createVector(width - 100, height / 2);
+
+  //HTML
+  div_scroll = select("#outer");
 }
 
 function setInitialState() {
@@ -122,6 +127,7 @@ let rileva = true;
  */
 function drawScreen1() {
   background(bg_color);
+  div_scroll.show();
   if (detections) {
     manageBlobs();
     if (detections.length < 2) {
@@ -136,6 +142,7 @@ function drawScreen1() {
 }
 
 function drawScreen2() {
+  div_scroll.hide();
   background(bg_color);
   strokeWeight(4);
   stroke(0, 255, 0);
@@ -250,45 +257,47 @@ function drawScreen3() {
   if (!transition_bg) bg_color = expressions_properties[final_exp].color;
   for (let i = 0; i < 10; i++) if (sync_printed <= sync) sync_printed += 0.1;
   const rounded_sync = floor(sync_printed, 1);
-  push();
-  background(bg_color);
-  textSize(40);
-  noStroke();
-  textAlign(CENTER);
-  fill(0);
-  text(
-    `Congratulations!
-    You completed the experience!
-    Your expression: ${final_exp}
-    Your sync: ${rounded_sync}%`,
-    width / 2 + 1,
-    height / 4 + 1
-  );
-  fill(255);
-  text(
-    `Congratulations!
-    You completed the experience!
-    Your expression: ${final_exp}
-    Your sync: ${rounded_sync}%`,
-    width / 2,
-    height / 4
-  );
+  if (!transition_bg) {
+    push();
+    background(bg_color);
+    textSize(40);
+    noStroke();
+    textAlign(CENTER);
+    fill(0);
+    text(
+      `Congratulations!
+      You completed the experience!
+      Your expression: ${final_exp}
+      Your sync: ${rounded_sync}%`,
+      width / 2 + 1,
+      height / 4 + 1
+    );
+    fill(255);
+    text(
+      `Congratulations!
+        You completed the experience!
+        Your expression: ${final_exp}
+        Your sync: ${rounded_sync}%`,
+      width / 2,
+      height / 4
+    );
 
-  pop();
-  let i = 0;
-  for (const e in exp_perc) {
-    if (e != "neutral") {
-      textSize(20);
-      const fill_c = expressions_properties[e].color;
-      fill_c.setAlpha(255);
-      const n = e.charAt(0).toUpperCase() + e.slice(1);
-      fill(0);
-      text(`${n}: ${exp_perc[e]}%`, width / 2 + 1, 25 * i + height / 2 + 1);
-      e == blobs[0].expressions.next ? fill(255) : fill(fill_c);
-      text(`${n}: ${exp_perc[e]}%`, width / 2, 25 * i + height / 2);
+    pop();
+    let i = 0;
+    for (const e in exp_perc) {
+      if (e != "neutral") {
+        textSize(20);
+        const fill_c = expressions_properties[e].color;
+        fill_c.setAlpha(255);
+        const n = e.charAt(0).toUpperCase() + e.slice(1);
+        fill(0);
+        text(`${n}: ${exp_perc[e]}%`, width / 2 + 1, 25 * i + height / 2 + 1);
+        e == blobs[0].expressions.next ? fill(255) : fill(fill_c);
+        text(`${n}: ${exp_perc[e]}%`, width / 2, 25 * i + height / 2);
+      }
+
+      i++;
     }
-
-    i++;
   }
 
   if (transition_bg) tansitionBG(bg_color, ts);
