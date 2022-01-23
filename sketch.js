@@ -30,7 +30,8 @@ let blobCreati = false;
 let grow = false;
 
 //  HTML Elements
-let div_scroll;
+let div_scroll = [];
+let div_text_1;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -90,8 +91,9 @@ function setup() {
   a2 = createVector(width - 100, height / 2);
 
   //HTML
+  div_text_1 = select("#scritte-spiegazione");
+  div_text_1.hide();
   div_scroll = [select("#top"), select("#bottom")];
-  console.log("div_scroll:", div_scroll);
 }
 
 function setInitialState() {
@@ -102,19 +104,24 @@ function setInitialState() {
   }
 }
 
+let m = 0;
+
 /**
  * Screen 1 => {@link drawScreen1()}
  * Screen 2 => {@link drawScreen2()}
  * Screen 3 => {@link drawScreen3()}
  */
 function draw() {
+  m = millis();
   if (screen_1) drawScreen1();
   else if (screen_2) drawScreen2();
   else if (screen_3) drawScreen3();
 }
 
 let rileva = true;
-
+let text_animation = false;
+let start;
+let duration;
 /**
  * Linked to {@link manageBlobs()}
  */
@@ -124,16 +131,36 @@ function drawScreen1() {
     d.show();
   });
 
+  const animation_time = 5000 * 5;
+
   if (detections) {
     manageBlobs();
     if (detections.length < 2) {
       fill(255);
-      text("Place yourself in front of the blob", width / 2, 100);
+    } else if (detections.length == 2) {
+      //  *Faccio partire le azimazioni
+      if (!text_animation) {
+        start = m;
+        div_text_1.show();
+        text_animation = true;
+      }
+      if (text_animation) {
+        duration = m - start;
+
+        if (duration >= animation_time) {
+          console.log("Animazine finita");
+          text_animation = false;
+          screen_1 = false;
+          screen_2 = true;
+        }
+      }
     }
-    //  TODO Faccio partire le azimazioni if detections.lenght == 2
   } else {
     fill(255);
-    text("Loading the face recognition...", width / 2, 100);
+    textAlign(CENTER);
+    textSize(25);
+    const load_text = "Loading the face recognition...";
+    text(load_text.toUpperCase(), width / 2, height / 2);
   }
 }
 
@@ -141,6 +168,8 @@ function drawScreen2() {
   div_scroll.forEach((d) => {
     d.hide();
   });
+
+  div_text_1.hide();
   background(bg_color);
   strokeWeight(4);
   stroke(0, 255, 0);
@@ -184,12 +213,12 @@ function manageBlobs() {
       if (screen_1) {
         if (side == "left") {
           b.pos.x = startPositions[0];
-          index = 0;
           altro = "right";
+          // index = 0;
         } else if (side == "right") {
           b.pos.x = startPositions[1];
-          index = 1;
           altro = "left";
+          // index = 1;
         }
       }
 
@@ -332,6 +361,7 @@ function tansitionBG(c1, timeStamp) {
 
 function checkDistance(_blobs) {
   const f = p5.Vector.sub(_blobs[0].pos, _blobs[1].pos);
+  console.log("f:", f);
   const d = f.mag();
   return d;
 }

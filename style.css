@@ -1,12 +1,26 @@
+:root {
+  --animation-delay: 5s;
+  --clr-neutro: rgb(131, 131, 131);
+  --clr-incazzato: rgb(230, 0, 0);
+  --clr-paura: rgb(114, 0, 149);
+  --clr-tristezza: rgb(0, 105, 148);
+  --clr-felice: rgb(255, 205, 0);
+  --clr-disgusto: rgb(107, 142, 35);
+  --clr-sorpresa: rgb(255, 0, 127);
+}
+
 * {
   font-family: lores-12, sans-serif;
   font-weight: 400;
   font-style: normal;
 }
+
 html,
 body {
   margin: 0;
   padding: 0;
+  background-color: black;
+  color: white;
 }
 
 canvas {
@@ -16,6 +30,7 @@ canvas {
 .scroll {
   overflow: hidden;
   color: white;
+  font-size: 1em;
 }
 
 #top div {
@@ -44,44 +59,44 @@ canvas {
 }
 
 /*FADE IN*/
-.p1 {
-  animation-name: fade1;
+#p1 {
+  animation-name: fade;
   animation-duration: var(--animation-delay);
   animation-timing-function: ease-in;
   animation-fill-mode: both;
 }
 /*FADE IN*/
-.p2 {
-  animation-name: fade2;
+#p2 {
+  animation-name: fade;
   animation-duration: var(--animation-delay);
   animation-timing-function: ease-in;
   animation-fill-mode: both;
   animation-delay: calc(var(--animation-delay) * 1);
 }
-.p3 {
-  animation-name: fade3;
+#p3 {
+  animation-name: fade;
   animation-duration: var(--animation-delay);
   animation-timing-function: ease-in;
   animation-fill-mode: both;
   animation-delay: calc(var(--animation-delay) * 2);
 }
 /*FADE IN*/
-.p4 {
-  animation-name: fade4;
+#p4 {
+  animation-name: fade;
   animation-duration: var(--animation-delay);
   animation-timing-function: ease-in;
   animation-fill-mode: both;
   animation-delay: calc(var(--animation-delay) * 3);
 }
-.p5 {
-  animation-name: fade5;
+#p5 {
+  animation-name: fade;
   animation-duration: var(--animation-delay);
   animation-timing-function: ease-in;
   animation-fill-mode: both;
   animation-delay: calc(var(--animation-delay) * 4);
 }
 /* The animation code */
-@keyframes fade1 {
+@keyframes fade {
   0% {
     opacity: 0;
   }
@@ -92,58 +107,12 @@ canvas {
     opacity: 0;
   }
 }
-@keyframes fade2 {
-  0% {
-    opacity: 0;
-  }
-  50% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-  }
-}
-@keyframes fade3 {
-  0% {
-    opacity: 0;
-  }
-  50% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-  }
-}
-@keyframes fade4 {
-  0% {
-    opacity: 0;
-  }
-  50% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-  }
-}
-@keyframes fade5 {
-  0% {
-    opacity: 0;
-  }
-  50% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-  }
-}
+
 /*posizione scritte*/
-.p1,
-.p2,
-.p3,
-.p4,
-.p5 {
+.p_text {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  font-size: 1.5em;
 }
