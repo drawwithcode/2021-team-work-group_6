@@ -14,7 +14,6 @@ let sync = 0;
 let change = [0, 0];
 const alpha = 50;
 let bg_color = 0;
-let currX = [];
 let startPositions = [];
 let exp_perc = {};
 let timeStamp = 0;
@@ -203,52 +202,33 @@ function manageBlobs() {
     //  Blobs[1] --> x: width/3*2; --> "right" --> 1
 
     blobs.forEach((b, index) => {
-      const side = b.side;
-      let altro = "";
-      // console.log(`${side} --> ${index}: ${b.pos.x}`);
-
       b.neutral = false;
-      if (screen_1) {
-        if (side == "left") {
-          b.pos.x = startPositions[0];
-          altro = "right";
-          // index = 0;
-        } else if (side == "right") {
-          b.pos.x = startPositions[1];
-          altro = "left";
-          // index = 1;
-        }
-      }
 
+      //  If there's one detection, draw a Neutral in the empty side
       if (detections.length == 1) {
-        b_index = side == "left" ? 0 : 1;
-        blobs[1].side = altro;
+        blobs[1].pos.x =
+          blobs[0].pos.x < width / 2 ? startPositions[1] : startPositions[0];
+        console.log(" blobs[1].pos.x:", blobs[1].pos.x);
         blobs[1].neutral = true;
       }
 
-      const roughness = blobs[index].intensity * 10;
-
+      // const roughness = blobs[index].intensity * 10;
+      //  ! Non si muovono più...
       if (screen_2) {
         //* Intensity of central point (-2, 2) --> 0-100%
         let mappedI = map(sync, 0, 100, -2, 2);
         let mappedI_2 = map(sync, 0, 100, 1, -1);
-        blobs[index].attracted(a0, mappedI);
-        blobs[index] == 0
-          ? blobs[index].attracted(a1, mappedI_2)
-          : blobs[index].attracted(a2, mappedI_2);
-        blobs[index].update(); //* Update blobs' postition
+        b.attracted(a0, mappedI);
+        b.pos.x < width / 2
+          ? b.attracted(a1, mappedI_2)
+          : b.attracted(a2, mappedI_2);
+        b.update(); //* Update blobs' postition
       }
       //* Speed of change
-      change[index] += blobs[index].properties.changeIncrement;
-      if (!blobs[index].neutral) {
-        blobs[index].showBlobs(
-          roughness,
-          blobs[index].properties.color,
-          change[index],
-          blobs[index].properties.offset,
-          blobs[index].expressions.next
-        );
-      } else drawNeutral(b_index);
+      change[index] += b.properties.changeIncrement;
+      if (!b.neutral) {
+        b.showBlobs(change[index]);
+      } else drawNeutral(1);
     });
 
     // if (detections.length == 1) drawNeutral(b_index);
@@ -265,7 +245,7 @@ function drawNeutral(index) {
   const neutral_c = expressions_properties.neutral.color;
   neutral_c.setAlpha(alpha);
   change[index] += expressions_properties.neutral.changeIncrement;
-  blobs[index].showBlobs(
+  blobs[index].showBlobsNeutral(
     roughness,
     neutral_c,
     change[index],
@@ -359,19 +339,17 @@ function tansitionBG(c1, timeStamp) {
 
 function checkDistance(_blobs) {
   const f = p5.Vector.sub(_blobs[0].pos, _blobs[1].pos);
-  console.log("f:", f);
   const d = f.mag();
   return d;
 }
 
-let prevProp = {};
-let nextProp = {};
-
 function getFaceElements() {
   //* Per ogni faccia rilevata
+  blobs_creati = [];
   detections.forEach((d, index) => {
-    currX[index] = d.detection._box._x;
-    blobs[index].side = currX[index] > 200 ? "left" : "right";
+    if (screen_1)
+      blobs[index].pos.x =
+        d.detection._box._x > 200 ? startPositions[0] : startPositions[1];
 
     blobs[index].expressionList = d.expressions;
 
@@ -397,19 +375,15 @@ function getFaceElements() {
           console.log("%cTRANSITION!", "font-weight:bold; color:red");
           console.log(`${prev} --> ${next}`);
           console.table(d.expressions);
-          transition = true;
+          blobs[index].transition = true;
           timeStamp = Date.now();
-          prevProp = expressions_properties[prev];
-          nextProp = expressions_properties[next];
+          blobs[index].prevProp = expressions_properties[prev];
+          blobs[index].nextProp = expressions_properties[next];
         }
 
-        if (transition) {
-          blobs[index].properties = propertiesTransitions(
-            prevProp,
-            nextProp,
-            timeStamp
-          );
-        } else if (!transition) {
+        if (blobs[index].transition) {
+          blobs[index].propertiesTransitions(timeStamp);
+        } else if (!blobs[index].transition) {
           blobs[index].properties.color = expressions_properties[next].color;
           blobs[index].properties.color.setAlpha(alpha);
         }
@@ -434,7 +408,6 @@ function getFaceElements() {
   if (detections.length == 2) {
     //  TODO Ottimizzare sta roba
     sync = shallowEquity(blobs[0].expressionList, blobs[1].expressionList);
-    // console.log("sync:", sync + "%");
   }
 }
 
@@ -451,7 +424,7 @@ function drawExpressionValues(e, expObj, index, i) {
     push();
     let offX = 0;
     let offY = (height / 3) * 2;
-    offX = currX[index] >= 200 ? width / 10 : width - width / 8;
+    offX = blobs[index].pos.x < width / 2 ? width / 10 : width - width / 8;
 
     translate(offX, offY);
     const _color = expressions_properties[e].color;
@@ -485,30 +458,29 @@ function shallowEquity(obj1, obj2) {
     exp_perc[key] = round(map(delta, 0, 1, 100, 0), 1);
   }
   // *Create object with % of every expression
-  // map(delta, 0,1, 100, 0)
   let perc = map(diff, 0, 2, 100, 0);
   return round(perc, 1);
 }
 
 /**
- * *Transition between the properties of two objects
+ * * Transition between the properties of two objects
  * @param {Object} o1
  * @param {Object} o2
  * @param {*} lastTimestamp
  * @returns {Object}
- */
+ 
 function propertiesTransitions(o1, o2, lastTimestamp) {
   const now = Date.now();
   const interval = 1000;
   const amt = (now - lastTimestamp) / interval;
-  console.log("amt:", amt);
+  // console.log("amt:", amt);
 
   const c1 = o1.color;
   const c2 = o2.color;
 
   // let amt = 0; // da 0 a 1
   const lerped_color = lerpColor(c1, c2, amt);
-  console.log("lerped_color:", lerped_color);
+  // console.log("lerped_color:", lerped_color);
   const lerped_change = lerp(o1.changeIncrement, o2.changeIncrement, amt);
   const lerped_offset = lerp(o1.offset, o2.offset, amt);
 
@@ -520,7 +492,8 @@ function propertiesTransitions(o1, o2, lastTimestamp) {
     offset: lerped_offset,
   };
 
-  if (amt >= 1) transition = false;
+  if (amt >= 1) blobs[index].transition = false;
 
   return obj;
 }
+*/
