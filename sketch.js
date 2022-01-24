@@ -10,8 +10,11 @@ let a0;
 let a1;
 let a2;
 let sync = 0;
-// The variable change stores the rate of rotation and the y coordinate for noise later
-let change = [0, 0];
+// let sync = {
+//   prev: 0,
+//   curr: 0,
+//   next: 0,
+// };
 const alpha = 50;
 let bg_color = 0;
 let startPositions = [];
@@ -27,6 +30,7 @@ let screen_3 = false;
 let transition = false;
 let blobCreati = false;
 let grow = false;
+let expansion = false;
 
 //  HTML Elements
 let div_scroll = [];
@@ -123,18 +127,15 @@ let duration;
  * Linked to {@link manageBlobs()}
  */
 function drawScreen1() {
+  const animation_time = 5000 * 5;
   background(bg_color);
   div_scroll.forEach((d) => {
     d.show();
   });
 
-  const animation_time = 5000 * 5;
-
   if (detections) {
     manageBlobs();
-    if (detections.length < 2) {
-      fill(255);
-    } else if (detections.length == 2) {
+    if (detections.length == 2) {
       //  *Faccio partire le azimazioni
       if (!text_animation) {
         start = m;
@@ -161,7 +162,14 @@ function drawScreen1() {
   }
 }
 
+//  ?  TODO Timer function
+function Timer() {}
+
+let logout = false;
+let start_logout = 0;
+let duration_logout = 0;
 function drawScreen2() {
+  const logout_time = 10000;
   div_scroll.forEach((d) => {
     d.hide();
   });
@@ -179,12 +187,37 @@ function drawScreen2() {
     noStroke();
     text("Faces detected: " + detections.length, 100, 100);
     if (detections.length == 2) {
+      logout = false;
       text("Syinc rate: " + sync + "%", width / 2, 100);
-    } else text("Not enough faces!", width / 2, 100);
+    } else if (detections.length < 2) {
+      if (!logout) {
+        start_logout = m;
+        logout = true;
+      }
 
+      if (logout) {
+        //Start timer
+        duration_logout = m - start_logout;
+        const countdown = round((logout_time - duration_logout) / 1000);
+        push();
+        textAlign(CENTER);
+        text(
+          `Not enough faces!
+        Returning home in: ${countdown}s`,
+          width / 2,
+          100
+        );
+        pop();
+        if (duration_logout >= logout_time) {
+          console.log("Going home...");
+          logout = false;
+          screen_1 = true;
+          screen_2 = false;
+        }
+      }
+    }
     manageBlobs();
   }
-  // TODO Timer di log out e restart
 }
 
 /**
@@ -193,27 +226,21 @@ function drawScreen2() {
  * Measure distance between blobs => {@link checkDistance()}
  */
 function manageBlobs() {
-  if (detections.length > 0) {
+  if (detections.length > 0 || expansion) {
     if (rileva) getFaceElements();
     blob_distance = checkDistance(blobs);
-
-    let b_index = 0;
-    //  Blobs[0] --> x: width/3   --> "left" --> 0
-    //  Blobs[1] --> x: width/3*2; --> "right" --> 1
 
     blobs.forEach((b, index) => {
       b.neutral = false;
 
       //  If there's one detection, draw a Neutral in the empty side
-      if (detections.length == 1) {
+      if (detections.length == 1 && !expansion) {
         blobs[1].pos.x =
           blobs[0].pos.x < width / 2 ? startPositions[1] : startPositions[0];
-        console.log(" blobs[1].pos.x:", blobs[1].pos.x);
+        console.log("blobs[1].pos.x:", blobs[1].pos.x);
         blobs[1].neutral = true;
       }
 
-      // const roughness = blobs[index].intensity * 10;
-      //  ! Non si muovono più...
       if (screen_2) {
         //* Intensity of central point (-2, 2) --> 0-100%
         let mappedI = map(sync, 0, 100, -2, 2);
@@ -225,14 +252,15 @@ function manageBlobs() {
         b.update(); //* Update blobs' postition
       }
       //* Speed of change
-      change[index] += b.properties.changeIncrement;
+      b.change += b.properties.changeIncrement;
       if (!b.neutral) {
-        b.showBlobs(change[index]);
+        b.showBlobs();
       } else drawNeutral(1);
     });
 
+    //  TODO Optimize drawBlobsNeutral function
     // if (detections.length == 1) drawNeutral(b_index);
-  } else {
+  } else if (!expansion) {
     for (let i = 0; i < blobs.length; i++) drawNeutral(i);
   }
 }
@@ -244,11 +272,11 @@ function drawNeutral(index) {
   const roughness = 5;
   const neutral_c = expressions_properties.neutral.color;
   neutral_c.setAlpha(alpha);
-  change[index] += expressions_properties.neutral.changeIncrement;
+  blobs[index].change += expressions_properties.neutral.changeIncrement;
   blobs[index].showBlobsNeutral(
     roughness,
     neutral_c,
-    change[index],
+    blobs[index].change,
     expressions_properties.neutral.offset,
     "neutral"
   );
@@ -258,12 +286,14 @@ let transition_bg = false;
 let sync_printed = 0;
 function drawScreen3() {
   const final_exp = blobs[0].expressions.next;
+
   if (!transition_bg) bg_color = expressions_properties[final_exp].color;
-  for (let i = 0; i < 10; i++) if (sync_printed <= sync) sync_printed += 0.1;
-  const rounded_sync = floor(sync_printed, 1);
+  background(bg_color);
+
   if (!transition_bg) {
+    for (let i = 0; i < 10; i++) if (sync_printed <= sync) sync_printed += 0.1;
+    const rounded_sync = floor(sync_printed, 1);
     push();
-    background(bg_color);
     textSize(40);
     noStroke();
     textAlign(CENTER);
@@ -279,9 +309,9 @@ function drawScreen3() {
     fill(255);
     text(
       `Congratulations!
-        You completed the experience!
-        Your expression: ${final_exp}
-        Your sync: ${rounded_sync}%`,
+      You completed the experience!
+      Your expression: ${final_exp}
+      Your sync: ${rounded_sync}%`,
       width / 2,
       height / 4
     );
@@ -304,7 +334,7 @@ function drawScreen3() {
     }
   }
 
-  if (transition_bg) tansitionBG(bg_color, ts);
+  if (transition_bg) transitionBG(bg_color, ts);
 }
 let ts;
 function mouseClicked() {
@@ -322,12 +352,14 @@ function mouseClicked() {
 }
 
 //* Background color transition
-function tansitionBG(c1, timeStamp) {
+function transitionBG(c1, timeStamp) {
+  console.log("BG TRANSITION");
   const now = Date.now();
   const interval = 1000;
   const amt = (now - timeStamp) / interval;
   const c2 = color(0);
   bg_color = lerpColor(c1, c2, amt);
+  console.log("lerped", bg_color);
 
   if (amt >= 1) {
     transition_bg = false;
@@ -461,39 +493,3 @@ function shallowEquity(obj1, obj2) {
   let perc = map(diff, 0, 2, 100, 0);
   return round(perc, 1);
 }
-
-/**
- * * Transition between the properties of two objects
- * @param {Object} o1
- * @param {Object} o2
- * @param {*} lastTimestamp
- * @returns {Object}
- 
-function propertiesTransitions(o1, o2, lastTimestamp) {
-  const now = Date.now();
-  const interval = 1000;
-  const amt = (now - lastTimestamp) / interval;
-  // console.log("amt:", amt);
-
-  const c1 = o1.color;
-  const c2 = o2.color;
-
-  // let amt = 0; // da 0 a 1
-  const lerped_color = lerpColor(c1, c2, amt);
-  // console.log("lerped_color:", lerped_color);
-  const lerped_change = lerp(o1.changeIncrement, o2.changeIncrement, amt);
-  const lerped_offset = lerp(o1.offset, o2.offset, amt);
-
-  lerped_color.setAlpha(alpha);
-
-  const obj = {
-    color: lerped_color,
-    changeIncrement: lerped_change,
-    offset: lerped_offset,
-  };
-
-  if (amt >= 1) blobs[index].transition = false;
-
-  return obj;
-}
-*/
