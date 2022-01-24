@@ -33,6 +33,12 @@ let grow = false;
 let div_scroll = [];
 let div_text_1;
 
+let mySong;
+
+function preload() {
+  mySong = loadSound("./assets/sound.mp3");
+}
+
 function setup() {
   createCanvas(windowWidth, windowHeight);
   background(bg_color);
@@ -111,6 +117,16 @@ let m = 0;
  * Screen 2 => {@link drawScreen2()}
  * Screen 3 => {@link drawScreen3()}
  */
+
+// function musicPlay() {
+//   if (mouseMoved) {
+//     mySong.play();
+//   } else {
+//     if (mySong.isPlaying() === false) {
+//       mySong.play();
+//     }
+//   }
+// }
 function draw() {
   m = millis();
   if (screen_1) drawScreen1();
