@@ -126,7 +126,7 @@ function draw() {
  * Linked to {@link manageBlobs()}
  */
 function drawScreen1() {
-  const animation_time = 5000 * 5;
+  const animation_time = 3500 * 5;
   background(bg_color);
   div_scroll.forEach((d) => {
     d.show();
@@ -314,13 +314,11 @@ function mouseClicked() {
 
 //* Background color transition
 function transitionBG(c1, timeStamp) {
-  console.log("BG TRANSITION");
   const now = Date.now();
   const interval = 1000;
   const amt = (now - timeStamp) / interval;
   const c2 = color(0);
   bg_color = lerpColor(c1, c2, amt);
-  console.log("lerped", bg_color);
 
   if (amt >= 1) {
     transition_bg = false;
