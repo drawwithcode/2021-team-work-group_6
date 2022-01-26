@@ -365,183 +365,188 @@ function mouseClicked() {
     setInitialState();
   }
 
-    lerpColor(colors.prevExp, colors.currExp, 0.5);
+  lerpColor(colors.prevExp, colors.currExp, 0.5);
 
-//* Background color transition
-function transitionBG(c1, timeStamp) {
-  console.log("BG TRANSITION");
-  const now = Date.now();
-  const interval = 1000;
-  const amt = (now - timeStamp) / interval;
-  const c2 = color(0);
-  bg_color = lerpColor(c1, c2, amt);
-  console.log("lerped", bg_color);
+  //* Background color transition
+  function transitionBG(c1, timeStamp) {
+    console.log("BG TRANSITION");
+    const now = Date.now();
+    const interval = 1000;
+    const amt = (now - timeStamp) / interval;
+    const c2 = color(0);
+    bg_color = lerpColor(c1, c2, amt);
+    console.log("lerped", bg_color);
 
-  if (amt >= 1) {
-    transition_bg = false;
-    screen_3 = false;
-    screen_1 = true;
-    rileva = true;
+    if (amt >= 1) {
+      transition_bg = false;
+      screen_3 = false;
+      screen_1 = true;
+      rileva = true;
+    }
   }
-}
 
-function checkDistance(_blobs) {
-  same_exp =
-    _blobs[0].expressions.next == _blobs[1].expressions.next ? true : false;
+  function checkDistance(_blobs) {
+    same_exp =
+      _blobs[0].expressions.next == _blobs[1].expressions.next ? true : false;
 
-  const f = p5.Vector.sub(_blobs[0].pos, _blobs[1].pos);
-  const d = f.mag();
-  return d;
-}
+    const f = p5.Vector.sub(_blobs[0].pos, _blobs[1].pos);
+    const d = f.mag();
+    return d;
+  }
 
-let sPrev, sNext;
+  let sPrev, sNext;
 
-function getFaceElements() {
-  //* Per ogni faccia rilevata
-  blobs_creati = [];
-  detections.forEach((d, index) => {
-    if (screen_1)
-      blobs[index].pos.x =
-        d.detection._box._x > 200 ? startPositions[0] : startPositions[1];
+  function getFaceElements() {
+    //* Per ogni faccia rilevata
+    blobs_creati = [];
+    detections.forEach((d, index) => {
+      if (screen_1)
+        blobs[index].pos.x =
+          d.detection._box._x > 200 ? startPositions[0] : startPositions[1];
 
-    blobs[index].expressionList = d.expressions;
+      blobs[index].expressionList = d.expressions;
 
-    let expValue = 0;
-    const valTreshold = 0.05;
-    let i = 0;
+      let expValue = 0;
+      const valTreshold = 0.05;
+      let i = 0;
 
-    //*  For magico per espressione corrente in testa
-    for (const e in d.expressions) {
-      //  ! Problema: quando tutto sotto soglia, non appaiono le facce
-      const value = e === "neutral" ? d.expressions[e] * 0.1 : d.expressions[e];
-      if (value > valTreshold) {
-        blobs[index].expressions.prev = blobs[index].expressions.next;
-        blobs[index].expressions.next = e;
-        const prev = blobs[index].expressions.prev;
-        const next = blobs[index].expressions.next;
+      //*  For magico per espressione corrente in testa
+      for (const e in d.expressions) {
+        //  ! Problema: quando tutto sotto soglia, non appaiono le facce
+        const value =
+          e === "neutral" ? d.expressions[e] * 0.1 : d.expressions[e];
+        if (value > valTreshold) {
+          blobs[index].expressions.prev = blobs[index].expressions.next;
+          blobs[index].expressions.next = e;
+          const prev = blobs[index].expressions.prev;
+          const next = blobs[index].expressions.next;
 
-        // expValue = value;
-        blobs[index].intensity = d.expressions[e];
+          // expValue = value;
+          blobs[index].intensity = d.expressions[e];
 
-        //*  Transizione fluida tra stati
-        if (prev != next) {
-          console.log("%cTRANSITION!", "font-weight:bold; color:red");
-          // console.log(`${prev} --> ${next}`);
-          console.table(d.expressions);
-          blobs[index].transition = true;
-          timeStamp = Date.now();
-          blobs[index].prevProp = expressions_properties[prev];
-          blobs[index].nextProp = expressions_properties[next];
+          //*  Transizione fluida tra stati
+          if (prev != next) {
+            console.log("%cTRANSITION!", "font-weight:bold; color:red");
+            // console.log(`${prev} --> ${next}`);
+            console.table(d.expressions);
+            blobs[index].transition = true;
+            timeStamp = Date.now();
+            blobs[index].prevProp = expressions_properties[prev];
+            blobs[index].nextProp = expressions_properties[next];
+          }
+
+          if (blobs[index].transition) {
+            blobs[index].propertiesTransitions(timeStamp);
+          } else if (!blobs[index].transition) {
+            blobs[index].properties.color = expressions_properties[next].color;
+            // blobs[index].properties.color.setAlpha(alpha);
+          }
         }
 
-        if (blobs[index].transition) {
-          blobs[index].propertiesTransitions(timeStamp);
-        } else if (!blobs[index].transition) {
-          blobs[index].properties.color = expressions_properties[next].color;
-          // blobs[index].properties.color.setAlpha(alpha);
+        //  Display expressions values
+        if (screen_2) {
+          drawExpressionValues(e, d.expressions, index, i);
+          i++;
         }
       }
+    });
 
-      //  Display expressions values
-      if (screen_2) {
-        drawExpressionValues(e, d.expressions, index, i);
-        i++;
+    if (detections.length == 2) {
+      sync.prev = sync.next;
+      sync.next = shallowEquity(
+        blobs[0].expressionList,
+        blobs[1].expressionList
+      );
+      if (sync.prev != sync.next) {
+        // console.log(`Sync: ${sync.prev} --> ${sync.next}`);
+        sync_transition = true;
+        timeStamp = Date.now();
+        sPrev = sync.prev;
+        sNext = sync.next;
+      }
+      if (sync_transition) {
+        sync.curr = lerpSync(sPrev, sNext, timeStamp);
+      } else {
+        sync.curr = sync.next;
       }
     }
-  });
+  }
 
-  if (detections.length == 2) {
-    sync.prev = sync.next;
-    sync.next = shallowEquity(blobs[0].expressionList, blobs[1].expressionList);
-    if (sync.prev != sync.next) {
-      // console.log(`Sync: ${sync.prev} --> ${sync.next}`);
-      sync_transition = true;
-      timeStamp = Date.now();
-      sPrev = sync.prev;
-      sNext = sync.next;
-    }
-    if (sync_transition) {
-      sync.curr = lerpSync(sPrev, sNext, timeStamp);
-    } else {
-      sync.curr = sync.next;
+  /**
+   * *Function to display the values of the expressions
+   * @param {String} e
+   * @param {Object} expObj
+   * @param {*} index
+   * @param {*} i
+   */
+  function drawExpressionValues(e, expObj, index, i) {
+    const spacing = 20;
+    if (e != "asSortedArray") {
+      push();
+      let offX = 0;
+      let offY = (height / 3) * 2;
+      offX = blobs[index].pos.x < width / 2 ? width / 10 : width - width / 8;
+
+      if (currX[index] <= 200) {
+        offX = width - width / 8;
+      } else {
+        offX = width / 100;
+      }
+      translate(offX, offY);
+      const _color = expressions_properties[e].color;
+      let _value = round(expObj[e] * 10, 3);
+
+      if (isNaN(_value)) _value = 0;
+
+      _color.setAlpha(255);
+      fill(_color);
+      textSize(15);
+      textAlign(LEFT);
+      const nameExp = e.charAt(0).toUpperCase() + e.slice(1);
+      if (e != "neutral") text(`${nameExp}: ` + _value, 0, spacing * i);
+      pop();
     }
   }
-}
 
-/**
- * *Function to display the values of the expressions
- * @param {String} e
- * @param {Object} expObj
- * @param {*} index
- * @param {*} i
- */
-function drawExpressionValues(e, expObj, index, i) {
-  const spacing = 20;
-  if (e != "asSortedArray") {
-    push();
-    let offX = 0;
-    let offY = (height / 3) * 2;
-    offX = blobs[index].pos.x < width / 2 ? width / 10 : width - width / 8;
-
-    if (currX[index] <= 200) {
-      offX = width - width / 8;
-    } else {
-      offX = width / 100;
+  /**
+   * *shallowEquity between 2 objects
+   * Used to measure the difference between each expression and measure how similar they are in %
+   * @param {*} objects
+   * @returns
+   */
+  function shallowEquity(obj1, obj2) {
+    const keys = Object.keys(obj1);
+    let diff = 0;
+    for (let key of keys) {
+      if (key != "neutral") {
+        const delta = abs(obj1[key] - obj2[key]);
+        diff += delta;
+        // exp_perc[key] = round(map(delta, 0, 1, 100, 0), 1);
+      }
     }
-    translate(offX, offY);
-    const _color = expressions_properties[e].color;
-    let _value = round(expObj[e] * 10, 3);
-
-    if (isNaN(_value)) _value = 0;
-
-    _color.setAlpha(255);
-    fill(_color);
-    textSize(15);
-    textAlign(LEFT);
-    const nameExp = e.charAt(0).toUpperCase() + e.slice(1);
-    if (e != "neutral") text(`${nameExp}: ` + _value, 0, spacing * i);
-    pop();
+    // *Create object with % of every expression
+    let perc = map(diff, 0, 2, 100, 0);
+    return round(perc, 1);
   }
-}
 
-/**
- * *shallowEquity between 2 objects
- * Used to measure the difference between each expression and measure how similar they are in %
- * @param {*} objects
- * @returns
- */
-function shallowEquity(obj1, obj2) {
-  const keys = Object.keys(obj1);
-  let diff = 0;
-  for (let key of keys) {
-    if (key != "neutral") {
-      const delta = abs(obj1[key] - obj2[key]);
-      diff += delta;
-      // exp_perc[key] = round(map(delta, 0, 1, 100, 0), 1);
-    }
+  /**
+   * Everytime the sync changes this function lerps the value during the 1 second interval
+   * @param {number} prev
+   * @param {number} next
+   * @param {number} timeStamp
+   * @returns {number}
+   */
+  function lerpSync(prev, next, timeStamp) {
+    const now = Date.now();
+    const interval = 1000;
+    const amt = (now - timeStamp) / interval;
+
+    const lerped = lerp(prev, next, amt);
+    // console.log(`Sync: ${prev} --> ${next} == ${lerped}
+    //  Amt: ${amt}`);
+
+    if (amt > 1) sync_transition = false;
+
+    return round(lerped);
   }
-  // *Create object with % of every expression
-  let perc = map(diff, 0, 2, 100, 0);
-  return round(perc, 1);
-}
-
-/**
- * Everytime the sync changes this function lerps the value during the 1 second interval
- * @param {number} prev
- * @param {number} next
- * @param {number} timeStamp
- * @returns {number}
- */
-function lerpSync(prev, next, timeStamp) {
-  const now = Date.now();
-  const interval = 1000;
-  const amt = (now - timeStamp) / interval;
-
-  const lerped = lerp(prev, next, amt);
-  // console.log(`Sync: ${prev} --> ${next} == ${lerped}
-  //  Amt: ${amt}`);
-
-  if (amt > 1) sync_transition = false;
-
-  return round(lerped);
 }
