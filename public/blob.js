@@ -1,3 +1,11 @@
+/**
+ * *Riferimenti
+ * Attraction / Repulsion
+ * Daniel Shiffman
+ * http://codingtra.in
+ * Video: https://youtu.be/OAcXnzRNiCY
+ */
+
 class Blob {
   constructor(id, x, y) {
     this.id = id;
@@ -58,7 +66,7 @@ class Blob {
      * Source: MOODboard developers, thanks!
      */
 
-    const shakeReduction = 0.3;
+    const shakeReduction = 0.2;
 
     if (this.pos.x < a1.x) {
       this.vel.mult(shakeReduction);

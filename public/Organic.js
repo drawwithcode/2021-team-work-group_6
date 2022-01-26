@@ -1,3 +1,7 @@
+/**
+ * *Organic is used as layer to create the Blob
+ * https://medium.com/creative-coding-space/meet-blobby-in-p5-js-5d9d99232400
+ */
 class Organic {
   constructor(id, radius, pos, roughness, angle, color) {
     this.id = id;
@@ -52,7 +56,4 @@ class Organic {
     const incrementDelta = 5;
     this.radius += (1 + this.id * incrementDelta) * speed;
   }
-
-  // setting the particle in motion.
-  // https://p5js.org/examples/simulate-particles.html
 }
