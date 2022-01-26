@@ -5,36 +5,45 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Test Emozioni Visual</title>
+    <link rel="icon" type="image/png" href="./assets/favicon.svg" />
     <link rel="stylesheet" type="text/css" href="style.css" />
-
+    <link rel="stylesheet" href="https://use.typekit.net/btp4jeh.css" />
     <script src="libraries/p5.min.js"></script>
     <!-- <script src="libraries/p5.sound.min.js"></script> -->
     <script defer src="face-api.min.js"></script>
     <script defer src="script.js"></script>
+    <script defer src="animated_text.js"></script>
     <style>
-      /* body {
-        margin: 0;
-        padding: 0;
-        width: 100vw;
-        height: 100vh;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-      } */
-
-      /* canvas {
-        position: absolute;
-      } */
-
       video {
         display: flex;
       }
     </style>
   </head>
   <body>
+    <div id="top" class="scroll">
+      <div class="loop"></div>
+    </div>
+
+    <div id="scritte-spiegazione">
+      <span class="p_text" id="p1"
+        >IT IS HARD TO EXPRESS YOUR FEELINGS THROUGH WORDS.</span
+      >
+      <span class="p_text" id="p2">YOUR FACE. HOWEVER. NEVER LIES.</span>
+      <span class="p_text" id="p3">
+        LET YOUR EXPRESSIONS COMMUNICATE WITH YOU...
+      </span>
+      <span class="p_text" id="p4"
+        >...AND SEE HOW THEY CAN HELP YOU SYNC WITH ANOTHER HUMAN BEING.</span
+      >
+      <span class="p_text" id="p5">STAY SPEACHLESS.</span>
+    </div>
+
     <script src="sketch.js"></script>
     <video id="video" width="0" height="0" autoplay muted></video>
     <script src="Blob.js"></script>
     <script src="Organic.js"></script>
+    <div id="bottom" class="scroll">
+      <div class="loop"></div>
+    </div>
   </body>
 </html>

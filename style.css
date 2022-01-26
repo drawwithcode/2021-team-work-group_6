@@ -1,9 +1,118 @@
+:root {
+  --animation-delay: 5s;
+  --clr-neutro: rgb(131, 131, 131);
+  --clr-incazzato: rgb(230, 0, 0);
+  --clr-paura: rgb(114, 0, 149);
+  --clr-tristezza: rgb(0, 105, 148);
+  --clr-felice: rgb(255, 205, 0);
+  --clr-disgusto: rgb(107, 142, 35);
+  --clr-sorpresa: rgb(255, 0, 127);
+}
+
+* {
+  font-family: lores-12, sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
 html,
 body {
   margin: 0;
   padding: 0;
+  background-color: black;
+  color: white;
 }
 
 canvas {
   display: block;
+}
+
+.scroll {
+  overflow: hidden;
+  color: white;
+  font-size: 1em;
+}
+
+#top div {
+  position: fixed;
+  display: inline-block;
+}
+
+#bottom div {
+  position: fixed;
+  display: inline-block;
+  bottom: 0;
+}
+
+.loop {
+  white-space: nowrap;
+  animation: loop-anim 20s linear infinite;
+}
+
+@keyframes loop-anim {
+  0% {
+    margin-left: 0;
+  }
+  100% {
+    margin-left: -50%; /* This works because of the div between "top" and "loop" */
+  }
+}
+
+/*FADE IN*/
+#p1 {
+  animation-name: fade;
+  animation-duration: var(--animation-delay);
+  animation-timing-function: ease-in;
+  animation-fill-mode: both;
+}
+/*FADE IN*/
+#p2 {
+  animation-name: fade;
+  animation-duration: var(--animation-delay);
+  animation-timing-function: ease-in;
+  animation-fill-mode: both;
+  animation-delay: calc(var(--animation-delay) * 1);
+}
+#p3 {
+  animation-name: fade;
+  animation-duration: var(--animation-delay);
+  animation-timing-function: ease-in;
+  animation-fill-mode: both;
+  animation-delay: calc(var(--animation-delay) * 2);
+}
+/*FADE IN*/
+#p4 {
+  animation-name: fade;
+  animation-duration: var(--animation-delay);
+  animation-timing-function: ease-in;
+  animation-fill-mode: both;
+  animation-delay: calc(var(--animation-delay) * 3);
+}
+#p5 {
+  animation-name: fade;
+  animation-duration: var(--animation-delay);
+  animation-timing-function: ease-in;
+  animation-fill-mode: both;
+  animation-delay: calc(var(--animation-delay) * 4);
+}
+/* The animation code */
+@keyframes fade {
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/*posizione scritte*/
+.p_text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.5em;
 }
