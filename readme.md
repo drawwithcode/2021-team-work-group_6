@@ -20,7 +20,7 @@
 
 ### c. Challenges
 
-### d. References
+### d. References and tutorials
 
 ## 4. [TEAM](#4-team)
 
@@ -54,30 +54,20 @@ The project is composed of a single HTML page, in which the various parts are se
 1. The introduction page invites the two users to place themselves in front of the two blobs
 2. The presence of two faces activates the second part of the experience: a brief text will appear on screen explaining how the experience work, and right after the two coloured blobs will start animating and moving depending on the detected facial expressions.
    - if the two facial expressions match for a certain period of time, they will pull closer and overlap; statistics about the matching expressions and overall sync will be displayed on screen
-   - 2.2 if for some reason the users abandon mid-experience, the absence of a face for more than a few seconds will stop the experience
+   - if for some reason the users abandon mid-experience, the absence of a face for more than a few seconds will stop the experience
 3. In both cases, the page will go back to the introduction page, inviting other users to take their place in front of the screen
 
 # CODE
 
 **FACE RECOGNITION**
 
-[face-api.js ](justadudewhohacks.github.io) was implemented for face detection and face recognition. In our specific case, we used the facial expression recognition model. All the code containing the instruction to load the face-api library and detect the faces is cointained in the
+[face-api.js ](justadudewhohacks.github.io) was implemented for face detection and face recognition. In our specific case, we used the facial expression recognition model. All the code containing the instruction to load the face-api library and detect the faces is cointained in the [script.js](./script.js) file.
 
 **GENERATIVE ART**
 
-```
-class Organic {
-constructor(id, radius, pos, roughness, angle, color) {
-this.id = id;
-this.radius = radius; //radius of blob
-this.pos = pos;
-this.roughness = roughness; // magnitude of how much the circle is distorted
-this.angle = angle; //how much to rotate the circle by
-this.color = color; // color of the blob
-this.xSpeed = 1;
-this.ySpeed = 1;
-}
+The two blobs are created through the use of generative art based on different emotions.
 
+```
 class Blob {
   constructor(x, y) {
     this.pos = createVector(x, y);
@@ -99,16 +89,52 @@ class Blob {
       );
     }
   }
+
+
+  class Organic {
+constructor(id, radius, pos, roughness, angle, color) {
+this.id = id;
+this.radius = radius; //radius of blob
+this.pos = pos;
+this.roughness = roughness; // magnitude of how much the circle is distorted
+this.angle = angle; //how much to rotate the circle by
+this.color = color; // color of the blob
+this.xSpeed = 1;
+this.ySpeed = 1;
+}
+
 ```
 
-Each expression is characterized by a color, a rotation and a type of movement
+Each expression is characterized by a color, a rotation and a type of movement, for example:
 
 ```
 neutral: {
       color: color(89, 84, 87, alpha),
       changeIncrement: 0.0,
       offset: 0.0,
-    },
+    }
 ```
 
+**CHALLENGES**
+Gestione libreria e assegnarle, determinare dx e sx, monitorare e gestire 2 persone
+The main challenges we faced came from the implementation of the face-api library and, consequently, assigning each expression to a specific variable. The library is set to recognize 7 different emotions; unfortunately, especially when the code is set to analyse more than one face, it has some difficulties to differenciate between fear, disgust and anger.
+
+**REFERENCES AND TUTORIALS**
+
+[Build Real Time Face Detection With JavaScript](https://www.youtube.com/watch?v=CVClHLwv-4I&t=183s&ab_channel=WebDevSimplified)
+
+[Daniel Shiffman - The coding train](https://thecodingtrain.com/)
+
+[Coding Challenge #56: Attraction and Repulsion Forces](https://www.youtube.com/watch?v=OAcXnzRNiCY)
+
 # TEAM
+
+[Valentina Bettoni](https://www.behance.net/valentibettoni)
+
+[Alessio Brioschi]()
+
+[Mara Castiglioni](https://www.behance.net/maracastiglioni)
+
+[Sara Gussoni]()
+
+[Romario Muca]()
