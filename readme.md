@@ -162,16 +162,16 @@ The movement of each blob is influenced by two points: one in the middle of the 
 When the two expressions are in sync, the objects will be attracted by the point in the middle and repulsed by the respective external points, whereas different expressions will pull the two blobs towards the respective external points and push them away from the middle one.
 
 ```JavaScript
-  } if (screen_2) {
-        // Intensity of central point (-2, 2) --> 0-100%
-        let mappedI = map(sync.curr, 0, 100, -2, 2);
-        // Intensity of side point (-1, 1) --> 100-0%
-        let mappedI_2 = map(sync.curr, 0, 100, 1, -1);
-        b.attracted(a0, mappedI);
-        b.pos.x < width / 2
-          ? b.attracted(a1, mappedI_2)
-          : b.attracted(a2, mappedI_2);
-        b.update(); // Update blobs' postition
+if (screen_2) {
+  // Intensity of central point (-2, 2) --> 0-100%
+  let mappedI = map(sync.curr, 0, 100, -2, 2);
+  // Intensity of side point (-1, 1) --> 100-0%
+  let mappedI_2 = map(sync.curr, 0, 100, 1, -1);
+  b.attracted(a0, mappedI);
+  b.pos.x < width / 2
+    ? b.attracted(a1, mappedI_2)
+    : b.attracted(a2, mappedI_2);
+  b.update(); // Update blobs' postition
       }
 ```
 
