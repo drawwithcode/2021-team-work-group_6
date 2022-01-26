@@ -96,7 +96,6 @@ this.ySpeed = 1;
 and then we overlapped various layers in a Blob class to create the effective blob.
 
 ```
-
 class Blob {
   constructor(x, y) {
     this.pos = createVector(x, y);
