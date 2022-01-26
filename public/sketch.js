@@ -12,9 +12,7 @@ let bg_color = 0;
 let startPositions = [];
 let timeStamp = 0;
 let expressions_properties;
-
 let blob_distance = 1;
-let same_exp = false;
 
 let screen_1 = true;
 let screen_2 = false;
@@ -23,6 +21,23 @@ let sync_transition = false;
 let blobCreati = false;
 let grow = false;
 let expansion = false;
+let same_exp = false;
+let transition_bg = false;
+
+let sync_printed = 0;
+let m = 0;
+let ts;
+let sPrev, sNext;
+
+//Timers
+let rileva = true;
+let text_animation = false;
+let start;
+let duration;
+
+let logout = false;
+let start_logout = 0;
+let duration_logout = 0;
 
 //  HTML Elements
 let div_scroll = [];
@@ -95,8 +110,6 @@ function setInitialState() {
   }
 }
 
-let m = 0;
-
 /**
  * Screen 1 => {@link drawScreen1()}
  * Screen 2 => {@link drawScreen2()}
@@ -109,10 +122,6 @@ function draw() {
   else if (screen_3) drawScreen3();
 }
 
-let rileva = true;
-let text_animation = false;
-let start;
-let duration;
 /**
  * Linked to {@link manageBlobs()}
  */
@@ -152,9 +161,6 @@ function drawScreen1() {
   }
 }
 
-let logout = false;
-let start_logout = 0;
-let duration_logout = 0;
 function drawScreen2() {
   const logout_time = 10000;
   div_scroll.forEach((d) => {
@@ -254,8 +260,6 @@ function manageBlobs() {
   }
 }
 
-let transition_bg = false;
-let sync_printed = 0;
 function drawScreen3() {
   const final_exp = blobs[0].expressions.next;
 
@@ -289,31 +293,11 @@ function drawScreen3() {
       text(phrase2, width / 2, height / 2 + spaceY);
     }
     pop();
-    // let i = 0;
-    // for (const e in exp_perc) {
-    //   if (e != "neutral") {
-    //     textSize(20);
-    //     const fill_c = expressions_properties[e].color;
-    //     const n = e.charAt(0).toUpperCase() + e.slice(1);
-    //     fill_c.setAlpha(255);
-    //     fill(0);
-    //     text(
-    //       `${n}: ${exp_perc[e]}%`,
-    //       width / 2 + 1,
-    //       25 * i + height / 2 + 1 + spaceY
-    //     );
-    //     e == blobs[0].expressions.next ? fill(255) : fill(fill_c);
-    //     text(`${n}: ${exp_perc[e]}%`, width / 2, 25 * i + height / 2 + spaceY);
-    //   }
-
-    //   i++;
-    // }
   }
 
   if (transition_bg) transitionBG(bg_color, ts);
 }
 
-let ts;
 function mouseClicked() {
   if (screen_3 && sync_printed >= sync.curr) {
     transition_bg = true;
@@ -322,10 +306,10 @@ function mouseClicked() {
     setInitialState();
   }
 
-  if (screen_1) {
-    screen_1 = false;
-    screen_2 = true;
-  }
+  // if (screen_1) {
+  //   screen_1 = false;
+  //   screen_2 = true;
+  // }
 }
 
 //* Background color transition
@@ -354,8 +338,6 @@ function checkDistance(_blobs) {
   const d = f.mag();
   return d;
 }
-
-let sPrev, sNext;
 
 function getFaceElements() {
   //* Per ogni faccia rilevata
@@ -487,10 +469,7 @@ function lerpSync(prev, next, timeStamp) {
   const now = Date.now();
   const interval = 1000;
   const amt = (now - timeStamp) / interval;
-
   const lerped = lerp(prev, next, amt);
-  // console.log(`Sync: ${prev} --> ${next} == ${lerped}
-  //  Amt: ${amt}`);
 
   if (amt > 1) sync_transition = false;
 
