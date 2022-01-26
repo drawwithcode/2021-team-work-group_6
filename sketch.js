@@ -179,26 +179,22 @@ function drawScreen1() {
   }
 }
 
-function drawScreen2() {
-  div_scroll.forEach((d) => {
-    d.hide();
-  });
+// aggiungi funzione color transition !!!!
+class Organic {
+  constructor(radius, xpos, ypos, roughness, angle, color) {
+    this.radius = radius; //radius of blob
+    this.xpos = xpos; //x position of blob
+    this.ypos = ypos; // y position of blob
+    this.roughness = roughness; // magnitude of how much the circle is distorted
+    this.angle = angle; //how much to rotate the circle by
+    this.color = color; // color of the blob
+  }
 
-  div_text_1.hide();
-  background(bg_color);
-  strokeWeight(4);
-  stroke(0, 255, 0);
-  point(a0.x, a0.y);
-  point(a1.x, a1.y);
-  point(a2.x, a2.y);
-  if (detections) {
-    fill(255);
-    textSize(20);
-    noStroke();
-    text("Faces detected: " + detections.length, 100, 100);
-    if (detections.length == 2) {
-      text("Syinc rate: " + sync + "%", width / 2, 100);
-    } else text("Not enough faces!", width / 2, 100);
+  show(change, c, r) {
+    noStroke(); // no stroke for the circle
+    this.color = c;
+    this.roughness = r * 10;
+    fill(this.color); //color to fill the blob
 
     manageBlobs();
   }
@@ -305,60 +301,22 @@ function drawScreen3() {
     );
 
     pop();
-    let i = 0;
-    for (const e in exp_perc) {
-      if (e != "neutral") {
-        textSize(20);
-        const fill_c = expressions_properties[e].color;
-        fill_c.setAlpha(255);
-        const n = e.charAt(0).toUpperCase() + e.slice(1);
-        fill(0);
-        text(`${n}: ${exp_perc[e]}%`, width / 2 + 1, 25 * i + height / 2 + 1);
-        e == blobs[0].expressions.next ? fill(255) : fill(fill_c);
-        text(`${n}: ${exp_perc[e]}%`, width / 2, 25 * i + height / 2);
-      }
+  }
 
-      i++;
+  function colorTransition() {
+    let currExp;
+    let prevExp;
+
+    lerpColor(colors.prevExp, colors.currExp, 0.5);
+
+    if (prevExp == currExp) {
+      colorTransition = false;
+    } else {
+      colorTransition = true;
     }
   }
-
-  if (transition_bg) tansitionBG(bg_color, ts);
-}
-let ts;
-function mouseClicked() {
-  if (screen_3) {
-    transition_bg = true;
-    sync_printed = 0;
-    ts = Date.now();
-    setInitialState();
-  }
-
-  if (screen_1) {
-    screen_1 = false;
-    screen_2 = true;
-  }
-}
-
-//* Background color transition
-function tansitionBG(c1, timeStamp) {
-  const now = Date.now();
-  const interval = 1000;
-  const amt = (now - timeStamp) / interval;
-  const c2 = color(0);
-  bg_color = lerpColor(c1, c2, amt);
-
-  if (amt >= 1) {
-    transition_bg = false;
-    screen_3 = false;
-    screen_1 = true;
-    rileva = true;
-  }
-}
-
-function checkDistance(_blobs) {
-  const f = p5.Vector.sub(_blobs[0].pos, _blobs[1].pos);
-  const d = f.mag();
-  return d;
+  // color.transition (valorini) crea espressione prece e corrente, se diversi eseguo transizione
+  // colorLerp tra colore prece e succ
 }
 
 function getFaceElements() {
