@@ -1,11 +1,13 @@
-// Tutorial: https://www.youtube.com/watch?v=CVClHLwv-4I&t=183s&ab_channel=WebDevSimplified
-
+/**
+ * Tutorial for implementing the face-api library without ml5.js
+ * https://www.youtube.com/watch?v=CVClHLwv-4I&t=183s&ab_channel=WebDevSimplified
+ *
+ */
 const video = document.getElementById("video");
-const URL_MODELS = "/models";
+const URL_MODELS = "./models";
 
 Promise.all([
   faceapi.nets.tinyFaceDetector.loadFromUri(URL_MODELS),
-  faceapi.nets.faceLandmark68Net.loadFromUri(URL_MODELS),
   faceapi.nets.faceRecognitionNet.loadFromUri(URL_MODELS),
   faceapi.nets.faceExpressionNet.loadFromUri(URL_MODELS),
 ]).then(startVideo);
@@ -30,7 +32,7 @@ if (rileva) {
       detections = await faceapi
         .detectAllFaces(
           video,
-          new faceapi.TinyFaceDetectorOptions({ inputSize: 416 })
+          new faceapi.TinyFaceDetectorOptions({ inputSize: 256 })
         )
         .withFaceExpressions();
       // console.log("detections:", detections);
