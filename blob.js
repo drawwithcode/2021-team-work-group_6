@@ -28,11 +28,6 @@ class Blob {
     this.neutral = false;
     this.change = 0;
     this.transition = false;
-
-    // this.delay_time = 1000;
-    // this.delay = false;
-    // this.start_delay = 0;
-    // this.duration_delay = 0;
   }
 
   createOrganics() {
@@ -56,76 +51,60 @@ class Blob {
     this.pos.add(this.vel);
     this.acc.mult(0);
 
-    const bounceReduction = 0.6;
+    /**
+     * This segment helps the blobs stop when they are pushed towards the attraction points
+     * and prevents them to go over the boundries
+     *
+     * Source: MOODboard developers, thanks!
+     */
+
+    const shakeReduction = 0.3;
 
     if (this.pos.x < a1.x) {
-      this.vel.mult(bounceReduction);
+      this.vel.mult(shakeReduction);
       this.vel.reflect(createVector(1, 0));
       this.pos.x = a1.x;
     } else if (this.pos.x > a2.x) {
-      this.vel.mult(bounceReduction);
+      this.vel.mult(shakeReduction);
       this.vel.reflect(createVector(1, 0));
       this.pos.x = a2.x;
     }
-    if (this.pos.y < 0) {
-      this.vel.mult(bounceReduction);
+    if (this.pos.x < width / 2 && this.pos.x > a0.x) {
+      this.vel.mult(shakeReduction);
       this.vel.reflect(createVector(0, 1));
-      this.pos.y = 0;
-    } else if (this.pos.y > height) {
-      this.vel.mult(bounceReduction);
+      this.pos.x = a0.x;
+    } else if (this.pos.x > width / 2 && this.pos.x < a0.x) {
+      this.vel.mult(shakeReduction);
       this.vel.reflect(createVector(0, 1));
-      this.pos.y = height;
+      this.pos.x = a0.x;
     }
   }
 
-  showBlobsNeutral(rough, color, change, offset, e) {
-    const r_min = 125;
-    stroke(255);
-    // point(this.pos.x, this.pos.y);
-    this.organics.forEach((o) => {
-      if (screen_1 && !this.grown && detections.length > 0) o.grow();
-      if (o.radius > r_min) this.grown = true;
-      o.showOrganics(rough, color, change, offset);
-      o.move(this.pos);
-      // o.showText(e);
-      //  TODO 2 secondi --> Pausa rilevazione --> Espando Blob --> cambio BG
-      if (screen_2 && blob_distance < 10) {
-        rileva = false;
-        if (o.radius < width) o.expand();
-        else {
-          screen_2 = false;
-          screen_3 = true;
-        }
-      }
-    });
-  }
-
   showBlobs() {
-    //  TODO Neutral version
-    // if(!this.neutral){}
-    const rough = this.intensity * 10;
-    const color = this.properties.color;
-    const change = this.change;
-    const offset = this.properties.offset;
     const r_min = 125;
+    let rough;
+    let color;
+    let offset;
+    const change = this.change;
+    if (this.neutral) {
+      rough = 5;
+      color = expressions_properties.neutral.color;
+      offset = expressions_properties.neutral.offset;
+    } else {
+      rough = this.intensity * 10;
+      color = this.properties.color;
+      offset = this.properties.offset;
+    }
     stroke(255);
     // point(this.pos.x, this.pos.y);
     this.organics.forEach((o) => {
       if (screen_1 && !this.grown && detections.length > 0) o.grow();
       if (o.radius > r_min) this.grown = true;
       o.showOrganics(rough, color, change, offset);
-      o.move(this.pos);
+      // o.move(this.pos);
+      o.pos = this.pos;
       // o.showText(e);
-      //  TODO 1 secondi --> Pausa rilevazione --> Espando Blob --> cambio BG
-      if (screen_2 && blob_distance < 10) {
-        // if (!this.delay) {
-        //   this.start_delay = m;
-        //   this.delay = true;
-        // }
-        // if (this.delay) {
-        //   this.duration_delay = m - this.start_delay;
-        // }
-        // if (this.duration_delay >= this.delay_time) {
+      if (screen_2 && blob_distance < 10 && same_exp) {
         rileva = false;
         if (o.radius < width) {
           expansion = true;
@@ -135,7 +114,6 @@ class Blob {
           this.delay = false;
           screen_2 = false;
           screen_3 = true;
-          // }
         }
       }
     });

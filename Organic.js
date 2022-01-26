@@ -6,18 +6,13 @@ class Organic {
     this.roughness = roughness; // magnitude of how much the circle is distorted
     this.angle = angle; //how much to rotate the circle by
     this.color = color; // color of the blob
-    this.xSpeed = 1;
-    this.ySpeed = 1;
     this.off = 0;
-  }
-
-  move(v) {
-    this.pos = v;
   }
 
   showOrganics(_rough, _color, _change, _offset) {
     noStroke(); // no stroke for the circle
     this.color = _color;
+    this.color.setAlpha(alpha);
     this.roughness = _rough * 10;
     fill(this.color); //color to fill the blob
 
@@ -25,11 +20,9 @@ class Organic {
     push();
     translate(this.pos); //move to xpos, ypos
     rotate(this.angle + _change); //rotate by this.angle+change
-
     //begin a shape based on the vertex points below
     beginShape();
 
-    // let off = 0;
     this.off = 0;
     //The lines below create our vertex points
     for (let i = 0; i < TWO_PI; i += 0.1) {
@@ -50,13 +43,6 @@ class Organic {
     pop();
   }
 
-  showText(e) {
-    fill("white");
-    textSize(35);
-    textAlign(CENTER);
-    text(e, this.pos.x, this.pos.y);
-  }
-
   expand() {
     this.radius += 10;
   }
@@ -65,7 +51,6 @@ class Organic {
     const speed = 0.05;
     const incrementDelta = 5;
     this.radius += (1 + this.id * incrementDelta) * speed;
-    // // console.log("this.radius:", this.radius);
   }
 
   // setting the particle in motion.

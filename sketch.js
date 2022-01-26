@@ -9,25 +9,26 @@ let blobs = [];
 let a0;
 let a1;
 let a2;
-let sync = 0;
-// let sync = {
-//   prev: 0,
-//   curr: 0,
-//   next: 0,
-// };
+// let sync = 0;
+let sync = {
+  prev: 0,
+  curr: 0,
+  next: 1,
+};
 const alpha = 50;
 let bg_color = 0;
 let startPositions = [];
-let exp_perc = {};
+// let exp_perc = {};
 let timeStamp = 0;
 let expressions_properties;
 
 let blob_distance = 1;
+let same_exp = false;
 
 let screen_1 = true;
 let screen_2 = false;
 let screen_3 = false;
-let transition = false;
+let sync_transition = false;
 let blobCreati = false;
 let grow = false;
 let expansion = false;
@@ -36,13 +37,23 @@ let expansion = false;
 let div_scroll = [];
 let div_text_1;
 
+//  For Music
+let song;
+let amplitude;
+
+// function preload() {
+//   // img = loadImage("./assets/img/img.jpg");
+//   song = loadSound("./assets/sound/sound.mp3");
+// }
+
 function setup() {
   createCanvas(windowWidth, windowHeight);
   background(bg_color);
   frameRate(24);
-
   textStyle(NORMAL);
   textFont("lores-12");
+  // amplitude = new p5.Amplitude();
+  // amplitude.setInput(song);
 
   startPositions = [width / 3, (width / 3) * 2];
 
@@ -146,7 +157,7 @@ function drawScreen1() {
         duration = m - start;
 
         if (duration >= animation_time) {
-          console.log("Animazine finita");
+          console.log("Animazione finita");
           text_animation = false;
           screen_1 = false;
           screen_2 = true;
@@ -162,9 +173,6 @@ function drawScreen1() {
   }
 }
 
-//  ?  TODO Timer function
-function Timer() {}
-
 let logout = false;
 let start_logout = 0;
 let duration_logout = 0;
@@ -176,11 +184,11 @@ function drawScreen2() {
 
   div_text_1.hide();
   background(bg_color);
-  strokeWeight(4);
-  stroke(0, 255, 0);
-  point(a0.x, a0.y);
-  point(a1.x, a1.y);
-  point(a2.x, a2.y);
+  // strokeWeight(4);
+  // stroke(0, 255, 0);
+  // point(a0.x, a0.y);
+  // point(a1.x, a1.y);
+  // point(a2.x, a2.y);
   if (detections) {
     fill(255);
     textSize(20);
@@ -188,7 +196,7 @@ function drawScreen2() {
     text("Faces detected: " + detections.length, 100, 100);
     if (detections.length == 2) {
       logout = false;
-      text("Syinc rate: " + sync + "%", width / 2, 100);
+      text("Syinc rate: " + sync.curr + "%", width / 2, 100);
     } else if (detections.length < 2) {
       if (!logout) {
         start_logout = m;
@@ -196,7 +204,7 @@ function drawScreen2() {
       }
 
       if (logout) {
-        //Start timer
+        // *Start timer
         duration_logout = m - start_logout;
         const countdown = round((logout_time - duration_logout) / 1000);
         push();
@@ -214,6 +222,14 @@ function drawScreen2() {
           screen_1 = true;
           screen_2 = false;
         }
+      } else if (detections.length > 2) {
+        //! Cosa fare quando ci sono più di 2 facce
+        text(
+          `Too much faces!
+       Make sure you are on an empty background`,
+          100,
+          100
+        );
       }
     }
     manageBlobs();
@@ -226,25 +242,25 @@ function drawScreen2() {
  * Measure distance between blobs => {@link checkDistance()}
  */
 function manageBlobs() {
-  if (detections.length > 0 || expansion) {
+  if ((detections.length > 0 && detections.length < 3) || expansion) {
     if (rileva) getFaceElements();
     blob_distance = checkDistance(blobs);
 
-    blobs.forEach((b, index) => {
+    blobs.forEach((b) => {
       b.neutral = false;
 
       //  If there's one detection, draw a Neutral in the empty side
       if (detections.length == 1 && !expansion) {
         blobs[1].pos.x =
           blobs[0].pos.x < width / 2 ? startPositions[1] : startPositions[0];
-        console.log("blobs[1].pos.x:", blobs[1].pos.x);
+        // console.log("blobs[1].pos.x:", blobs[1].pos.x);
         blobs[1].neutral = true;
       }
 
       if (screen_2) {
         //* Intensity of central point (-2, 2) --> 0-100%
-        let mappedI = map(sync, 0, 100, -2, 2);
-        let mappedI_2 = map(sync, 0, 100, 1, -1);
+        let mappedI = map(sync.curr, 0, 100, -2, 2);
+        let mappedI_2 = map(sync.curr, 0, 100, 1, -1);
         b.attracted(a0, mappedI);
         b.pos.x < width / 2
           ? b.attracted(a1, mappedI_2)
@@ -252,34 +268,23 @@ function manageBlobs() {
         b.update(); //* Update blobs' postition
       }
       //* Speed of change
-      b.change += b.properties.changeIncrement;
-      if (!b.neutral) {
-        b.showBlobs();
-      } else drawNeutral(1);
+      b.change += !b.neutral
+        ? b.properties.changeIncrement
+        : expressions_properties.neutral.changeIncrement;
+      b.showBlobs();
     });
-
-    //  TODO Optimize drawBlobsNeutral function
-    // if (detections.length == 1) drawNeutral(b_index);
   } else if (!expansion) {
-    for (let i = 0; i < blobs.length; i++) drawNeutral(i);
+    // blobs.forEach((b) => {
+    //   b.neutral = true;
+    //   b.change += expressions_properties.neutral.changeIncrement;
+    //   b.showBlobs();
+    // });
+    for (let i = 0; i < 2; i++) {
+      blobs[i].neutral = true;
+      blobs[i].change += expressions_properties.neutral.changeIncrement;
+      blobs[i].showBlobs();
+    }
   }
-}
-
-/**
- * Function that draws a neutral blob as a placeholder
- */
-function drawNeutral(index) {
-  const roughness = 5;
-  const neutral_c = expressions_properties.neutral.color;
-  neutral_c.setAlpha(alpha);
-  blobs[index].change += expressions_properties.neutral.changeIncrement;
-  blobs[index].showBlobsNeutral(
-    roughness,
-    neutral_c,
-    blobs[index].change,
-    expressions_properties.neutral.offset,
-    "neutral"
-  );
 }
 
 let transition_bg = false;
@@ -291,54 +296,59 @@ function drawScreen3() {
   background(bg_color);
 
   if (!transition_bg) {
-    for (let i = 0; i < 10; i++) if (sync_printed <= sync) sync_printed += 0.1;
+    for (let i = 0; i < 10; i++)
+      if (sync_printed <= sync.curr) sync_printed += 0.1;
     const rounded_sync = floor(sync_printed, 1);
+    const phrase1 = `Congratulations!
+    You completed the experience!
+    Your expression: ${final_exp.toUpperCase()}
+    Your sync: ${rounded_sync}%`;
     push();
     textSize(40);
     noStroke();
     textAlign(CENTER);
     fill(0);
-    text(
-      `Congratulations!
-      You completed the experience!
-      Your expression: ${final_exp}
-      Your sync: ${rounded_sync}%`,
-      width / 2 + 1,
-      height / 4 + 1
-    );
+    text(phrase1, width / 2 + 1, height / 4 + 1);
     fill(255);
-    text(
-      `Congratulations!
-      You completed the experience!
-      Your expression: ${final_exp}
-      Your sync: ${rounded_sync}%`,
-      width / 2,
-      height / 4
-    );
+    text(phrase1, width / 2, height / 4);
 
-    pop();
-    let i = 0;
-    for (const e in exp_perc) {
-      if (e != "neutral") {
-        textSize(20);
-        const fill_c = expressions_properties[e].color;
-        fill_c.setAlpha(255);
-        const n = e.charAt(0).toUpperCase() + e.slice(1);
-        fill(0);
-        text(`${n}: ${exp_perc[e]}%`, width / 2 + 1, 25 * i + height / 2 + 1);
-        e == blobs[0].expressions.next ? fill(255) : fill(fill_c);
-        text(`${n}: ${exp_perc[e]}%`, width / 2, 25 * i + height / 2);
-      }
-
-      i++;
+    if (sync_printed >= sync.curr) {
+      const phrase2 = `CLICK TO RESTART THE EXPERIENCE`;
+      const spaceY = 200;
+      textSize(30);
+      fill(0);
+      text(phrase2, width / 2 + 1, height / 2 + 1 + spaceY);
+      fill(255);
+      text(phrase2, width / 2, height / 2 + spaceY);
     }
+    pop();
+    // let i = 0;
+    // for (const e in exp_perc) {
+    //   if (e != "neutral") {
+    //     textSize(20);
+    //     const fill_c = expressions_properties[e].color;
+    //     const n = e.charAt(0).toUpperCase() + e.slice(1);
+    //     fill_c.setAlpha(255);
+    //     fill(0);
+    //     text(
+    //       `${n}: ${exp_perc[e]}%`,
+    //       width / 2 + 1,
+    //       25 * i + height / 2 + 1 + spaceY
+    //     );
+    //     e == blobs[0].expressions.next ? fill(255) : fill(fill_c);
+    //     text(`${n}: ${exp_perc[e]}%`, width / 2, 25 * i + height / 2 + spaceY);
+    //   }
+
+    //   i++;
+    // }
   }
 
   if (transition_bg) transitionBG(bg_color, ts);
 }
+
 let ts;
 function mouseClicked() {
-  if (screen_3) {
+  if (screen_3 && sync_printed >= sync.curr) {
     transition_bg = true;
     sync_printed = 0;
     ts = Date.now();
@@ -370,10 +380,15 @@ function transitionBG(c1, timeStamp) {
 }
 
 function checkDistance(_blobs) {
+  same_exp =
+    _blobs[0].expressions.next == _blobs[1].expressions.next ? true : false;
+
   const f = p5.Vector.sub(_blobs[0].pos, _blobs[1].pos);
   const d = f.mag();
   return d;
 }
+
+let sPrev, sNext;
 
 function getFaceElements() {
   //* Per ogni faccia rilevata
@@ -405,7 +420,7 @@ function getFaceElements() {
         //*  Transizione fluida tra stati
         if (prev != next) {
           console.log("%cTRANSITION!", "font-weight:bold; color:red");
-          console.log(`${prev} --> ${next}`);
+          // console.log(`${prev} --> ${next}`);
           console.table(d.expressions);
           blobs[index].transition = true;
           timeStamp = Date.now();
@@ -417,29 +432,33 @@ function getFaceElements() {
           blobs[index].propertiesTransitions(timeStamp);
         } else if (!blobs[index].transition) {
           blobs[index].properties.color = expressions_properties[next].color;
-          blobs[index].properties.color.setAlpha(alpha);
+          // blobs[index].properties.color.setAlpha(alpha);
         }
       }
 
       //  Display expressions values
-      // if (detections.length == 2) {
       if (screen_2) {
         drawExpressionValues(e, d.expressions, index, i);
         i++;
       }
-      // }
     }
   });
 
-  // //  ?Funziona?
-  // if (detections.length == 0)
-  //   expression.forEach((e) => {
-  //     e.nextExp = "neutral";
-  //   });
-
   if (detections.length == 2) {
-    //  TODO Ottimizzare sta roba
-    sync = shallowEquity(blobs[0].expressionList, blobs[1].expressionList);
+    sync.prev = sync.next;
+    sync.next = shallowEquity(blobs[0].expressionList, blobs[1].expressionList);
+    if (sync.prev != sync.next) {
+      // console.log(`Sync: ${sync.prev} --> ${sync.next}`);
+      sync_transition = true;
+      timeStamp = Date.now();
+      sPrev = sync.prev;
+      sNext = sync.next;
+    }
+    if (sync_transition) {
+      sync.curr = lerpSync(sPrev, sNext, timeStamp);
+    } else {
+      sync.curr = sync.next;
+    }
   }
 }
 
@@ -470,14 +489,13 @@ function drawExpressionValues(e, expObj, index, i) {
     textAlign(LEFT);
     const nameExp = e.charAt(0).toUpperCase() + e.slice(1);
     if (e != "neutral") text(`${nameExp}: ` + _value, 0, spacing * i);
-    // i++;
-    _color.setAlpha(alpha);
     pop();
   }
 }
 
 /**
- * *shallowEquity tra i due oggetti--> Misurare Delta per ogni espressione--> Sottrarre Delta da TOT--> Mapparlo al 100%
+ * *shallowEquity between 2 objects
+ * Used to measure the difference between each expression and measure how similar they are in %
  * @param {*} objects
  * @returns
  */
@@ -485,11 +503,34 @@ function shallowEquity(obj1, obj2) {
   const keys = Object.keys(obj1);
   let diff = 0;
   for (let key of keys) {
-    const delta = abs(obj1[key] - obj2[key]);
-    diff += delta;
-    exp_perc[key] = round(map(delta, 0, 1, 100, 0), 1);
+    if (key != "neutral") {
+      const delta = abs(obj1[key] - obj2[key]);
+      diff += delta;
+      // exp_perc[key] = round(map(delta, 0, 1, 100, 0), 1);
+    }
   }
   // *Create object with % of every expression
   let perc = map(diff, 0, 2, 100, 0);
   return round(perc, 1);
+}
+
+/**
+ * Everytime the sync changes this function lerps the value during the 1 second interval
+ * @param {number} prev
+ * @param {number} next
+ * @param {number} timeStamp
+ * @returns {number}
+ */
+function lerpSync(prev, next, timeStamp) {
+  const now = Date.now();
+  const interval = 1000;
+  const amt = (now - timeStamp) / interval;
+
+  const lerped = lerp(prev, next, amt);
+  // console.log(`Sync: ${prev} --> ${next} == ${lerped}
+  //  Amt: ${amt}`);
+
+  if (amt > 1) sync_transition = false;
+
+  return round(lerped);
 }
