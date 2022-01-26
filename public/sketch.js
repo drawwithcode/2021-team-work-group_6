@@ -1,15 +1,7 @@
-/**
- * Daniel Shiffman
- * http://codingtra.in
- * Attraction / Repulsion
- * Video: https://youtu.be/OAcXnzRNiCY
- */
-// organic is used to store the list of instances of Organic objects that we will create
 let blobs = [];
 let a0;
 let a1;
 let a2;
-// let sync = 0;
 let sync = {
   prev: 0,
   curr: 0,
@@ -18,12 +10,9 @@ let sync = {
 const alpha = 50;
 let bg_color = 0;
 let startPositions = [];
-// let exp_perc = {};
 let timeStamp = 0;
 let expressions_properties;
-
 let blob_distance = 1;
-let same_exp = false;
 
 let screen_1 = true;
 let screen_2 = false;
@@ -32,19 +21,27 @@ let sync_transition = false;
 let blobCreati = false;
 let grow = false;
 let expansion = false;
+let same_exp = false;
+let transition_bg = false;
+
+let sync_printed = 0;
+let m = 0;
+let ts;
+let sPrev, sNext;
+
+//Timers
+let rileva = true;
+let text_animation = false;
+let start;
+let duration;
+
+let logout = false;
+let start_logout = 0;
+let duration_logout = 0;
 
 //  HTML Elements
 let div_scroll = [];
 let div_text_1;
-
-//  For Music
-let song;
-let amplitude;
-
-// function preload() {
-//   // img = loadImage("./assets/img/img.jpg");
-//   song = loadSound("./assets/sound/sound.mp3");
-// }
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -52,8 +49,6 @@ function setup() {
   frameRate(24);
   textStyle(NORMAL);
   textFont("lores-12");
-  // amplitude = new p5.Amplitude();
-  // amplitude.setInput(song);
 
   startPositions = [width / 3, (width / 3) * 2];
 
@@ -94,7 +89,6 @@ function setup() {
       offset: 0.005,
     },
   };
-  //// expressions = Object.keys(colors);
 
   setInitialState();
 
@@ -116,8 +110,6 @@ function setInitialState() {
   }
 }
 
-let m = 0;
-
 /**
  * Screen 1 => {@link drawScreen1()}
  * Screen 2 => {@link drawScreen2()}
@@ -130,10 +122,6 @@ function draw() {
   else if (screen_3) drawScreen3();
 }
 
-let rileva = true;
-let text_animation = false;
-let start;
-let duration;
 /**
  * Linked to {@link manageBlobs()}
  */
@@ -173,9 +161,6 @@ function drawScreen1() {
   }
 }
 
-let logout = false;
-let start_logout = 0;
-let duration_logout = 0;
 function drawScreen2() {
   const logout_time = 10000;
   div_scroll.forEach((d) => {
@@ -184,11 +169,6 @@ function drawScreen2() {
 
   div_text_1.hide();
   background(bg_color);
-  // strokeWeight(4);
-  // stroke(0, 255, 0);
-  // point(a0.x, a0.y);
-  // point(a1.x, a1.y);
-  // point(a2.x, a2.y);
   if (detections) {
     fill(255);
     textSize(20);
@@ -222,15 +202,14 @@ function drawScreen2() {
           screen_1 = true;
           screen_2 = false;
         }
-      } else if (detections.length > 2) {
-        //! Cosa fare quando ci sono più di 2 facce
-        text(
-          `Too much faces!
-       Make sure you are on an empty background`,
-          100,
-          100
-        );
       }
+    } else if (detections.length > 2) {
+      text(
+        `Too many faces!
+        Make sure you are on an empty background`,
+        width / 2,
+        100
+      );
     }
     manageBlobs();
   }
@@ -253,7 +232,6 @@ function manageBlobs() {
       if (detections.length == 1 && !expansion) {
         blobs[1].pos.x =
           blobs[0].pos.x < width / 2 ? startPositions[1] : startPositions[0];
-        // console.log("blobs[1].pos.x:", blobs[1].pos.x);
         blobs[1].neutral = true;
       }
 
@@ -274,11 +252,6 @@ function manageBlobs() {
       b.showBlobs();
     });
   } else if (!expansion) {
-    // blobs.forEach((b) => {
-    //   b.neutral = true;
-    //   b.change += expressions_properties.neutral.changeIncrement;
-    //   b.showBlobs();
-    // });
     for (let i = 0; i < 2; i++) {
       blobs[i].neutral = true;
       blobs[i].change += expressions_properties.neutral.changeIncrement;
@@ -287,8 +260,6 @@ function manageBlobs() {
   }
 }
 
-let transition_bg = false;
-let sync_printed = 0;
 function drawScreen3() {
   const final_exp = blobs[0].expressions.next;
 
@@ -322,31 +293,11 @@ function drawScreen3() {
       text(phrase2, width / 2, height / 2 + spaceY);
     }
     pop();
-    // let i = 0;
-    // for (const e in exp_perc) {
-    //   if (e != "neutral") {
-    //     textSize(20);
-    //     const fill_c = expressions_properties[e].color;
-    //     const n = e.charAt(0).toUpperCase() + e.slice(1);
-    //     fill_c.setAlpha(255);
-    //     fill(0);
-    //     text(
-    //       `${n}: ${exp_perc[e]}%`,
-    //       width / 2 + 1,
-    //       25 * i + height / 2 + 1 + spaceY
-    //     );
-    //     e == blobs[0].expressions.next ? fill(255) : fill(fill_c);
-    //     text(`${n}: ${exp_perc[e]}%`, width / 2, 25 * i + height / 2 + spaceY);
-    //   }
-
-    //   i++;
-    // }
   }
 
   if (transition_bg) transitionBG(bg_color, ts);
 }
 
-let ts;
 function mouseClicked() {
   if (screen_3 && sync_printed >= sync.curr) {
     transition_bg = true;
@@ -355,10 +306,10 @@ function mouseClicked() {
     setInitialState();
   }
 
-  if (screen_1) {
-    screen_1 = false;
-    screen_2 = true;
-  }
+  // if (screen_1) {
+  //   screen_1 = false;
+  //   screen_2 = true;
+  // }
 }
 
 //* Background color transition
@@ -388,8 +339,6 @@ function checkDistance(_blobs) {
   return d;
 }
 
-let sPrev, sNext;
-
 function getFaceElements() {
   //* Per ogni faccia rilevata
   blobs_creati = [];
@@ -401,39 +350,15 @@ function getFaceElements() {
     blobs[index].expressionList = d.expressions;
 
     let expValue = 0;
-    const valTreshold = 0.05;
+    let c_exp = "";
     let i = 0;
 
     //*  For magico per espressione corrente in testa
     for (const e in d.expressions) {
-      //  ! Problema: quando tutto sotto soglia, non appaiono le facce
       const value = e === "neutral" ? d.expressions[e] * 0.1 : d.expressions[e];
-      if (value > valTreshold) {
-        blobs[index].expressions.prev = blobs[index].expressions.next;
-        blobs[index].expressions.next = e;
-        const prev = blobs[index].expressions.prev;
-        const next = blobs[index].expressions.next;
-
-        // expValue = value;
-        blobs[index].intensity = d.expressions[e];
-
-        //*  Transizione fluida tra stati
-        if (prev != next) {
-          console.log("%cTRANSITION!", "font-weight:bold; color:red");
-          // console.log(`${prev} --> ${next}`);
-          console.table(d.expressions);
-          blobs[index].transition = true;
-          timeStamp = Date.now();
-          blobs[index].prevProp = expressions_properties[prev];
-          blobs[index].nextProp = expressions_properties[next];
-        }
-
-        if (blobs[index].transition) {
-          blobs[index].propertiesTransitions(timeStamp);
-        } else if (!blobs[index].transition) {
-          blobs[index].properties.color = expressions_properties[next].color;
-          // blobs[index].properties.color.setAlpha(alpha);
-        }
+      if (value > expValue) {
+        c_exp = e;
+        expValue = value;
       }
 
       //  Display expressions values
@@ -442,23 +367,42 @@ function getFaceElements() {
         i++;
       }
     }
+
+    blobs[index].expressions.prev = blobs[index].expressions.next;
+    blobs[index].expressions.next = c_exp;
+    const prev = blobs[index].expressions.prev;
+    const next = blobs[index].expressions.next;
+
+    blobs[index].intensity = d.expressions[c_exp];
+
+    //*  Transizione fluida tra stati
+    if (prev != next) {
+      console.log("%cTRANSITION!", "font-weight:bold; color:red");
+      console.log(`${prev} --> ${next}`);
+      blobs[index].transition = true;
+      timeStamp = Date.now();
+      blobs[index].prevProp = expressions_properties[prev];
+      blobs[index].nextProp = expressions_properties[next];
+    }
+
+    if (blobs[index].transition) {
+      blobs[index].propertiesTransitions(timeStamp);
+    } else if (!blobs[index].transition) {
+      blobs[index].properties.color = expressions_properties[next].color;
+    }
   });
 
   if (detections.length == 2) {
     sync.prev = sync.next;
     sync.next = shallowEquity(blobs[0].expressionList, blobs[1].expressionList);
     if (sync.prev != sync.next) {
-      // console.log(`Sync: ${sync.prev} --> ${sync.next}`);
       sync_transition = true;
       timeStamp = Date.now();
       sPrev = sync.prev;
       sNext = sync.next;
     }
-    if (sync_transition) {
-      sync.curr = lerpSync(sPrev, sNext, timeStamp);
-    } else {
-      sync.curr = sync.next;
-    }
+
+    sync.curr = sync_transition ? lerpSync(sPrev, sNext, timeStamp) : sync.next;
   }
 }
 
@@ -525,10 +469,7 @@ function lerpSync(prev, next, timeStamp) {
   const now = Date.now();
   const interval = 1000;
   const amt = (now - timeStamp) / interval;
-
   const lerped = lerp(prev, next, amt);
-  // console.log(`Sync: ${prev} --> ${next} == ${lerped}
-  //  Amt: ${amt}`);
 
   if (amt > 1) sync_transition = false;
 

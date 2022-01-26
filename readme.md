@@ -1,4 +1,6 @@
+
 ![](/assets/logo.svg)
+
 
 ## 1. [PROJECT IDEA](#project-idea)
 
@@ -48,17 +50,20 @@ Our project has been designed as an installation/exhibit; the installation is he
 
 # STRUCTURE
 
+
 ![scheme](/assets/schema.png)
 
 The project is composed of a single HTML page, in which the various parts are set to go off based on timers and the interaction of two faces in front of the screen.
 
 1. The introduction page invites the two users to place themselves in front of the two blobs
 2. The presence of two faces activates the second part of the experience: a brief text will appear on screen explaining how the experience work, and right after the two coloured blobs will start animating and moving depending on the detected facial expressions.
+
    - **a.** if the two facial expressions match for a certain period of time, they will pull closer and overlap; statistics about the matching expressions and overall sync will be displayed on screen and the experience will come to an end
    - **b.** if for some reason the users abandon mid-experience, the absence of a face for more than a few seconds will stop the experience
    - **c.** if there are less than two people in front of the screen, a countdown will activate, informing the user that there are not enough faces
    - **d.** if there are more than two people an invitation will ask the users to reduce the number of faces in front of the screen
 3. In case a,b and c, the page will go back to the introduction page, inviting other users to take their place in front of the screen.
+
 
 # CODE
 
@@ -74,6 +79,7 @@ The two blobs are created through the use of generative art based on the differe
 
 ```
   class Organic {
+
 constructor(id, radius, pos, roughness, angle, color) {
 this.id = id;
 this.radius = radius; //radius of blob
@@ -84,11 +90,13 @@ this.color = color; // color of the blob
 this.xSpeed = 1;
 this.ySpeed = 1;
 }
+
 ```
 
 and then we overlapped various layers in a Blob class to create the effective blob.
 
 ```
+
 class Blob {
   constructor(x, y) {
     this.pos = createVector(x, y);
@@ -112,13 +120,16 @@ class Blob {
   }
 ```
 
+
 Each expression is characterized by a color (chosen after a study on the topic of color emotion ), a rotation and a type of movement, for example:
+
 
 ```
 neutral: {
       color: color(89, 84, 87, alpha),
       changeIncrement: 0.0,
       offset: 0.0,
+
     }
 ```
 
@@ -211,3 +222,4 @@ Lastly, we tried to implement a background sound to accompany the whole experien
 [Sara Gussoni](https://www.behance.net/saragussoni/projects)
 
 [Romario Muca](https://www.behance.net/romario2/projects)
+

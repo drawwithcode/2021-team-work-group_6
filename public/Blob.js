@@ -1,3 +1,11 @@
+/**
+ * *Riferimenti
+ * Attraction / Repulsion
+ * Daniel Shiffman
+ * http://codingtra.in
+ * Video: https://youtu.be/OAcXnzRNiCY
+ */
+
 class Blob {
   constructor(id, x, y) {
     this.id = id;
@@ -58,7 +66,7 @@ class Blob {
      * Source: MOODboard developers, thanks!
      */
 
-    const shakeReduction = 0.3;
+    const shakeReduction = 0.2;
 
     if (this.pos.x < a1.x) {
       this.vel.mult(shakeReduction);
@@ -96,14 +104,11 @@ class Blob {
       offset = this.properties.offset;
     }
     stroke(255);
-    // point(this.pos.x, this.pos.y);
     this.organics.forEach((o) => {
       if (screen_1 && !this.grown && detections.length > 0) o.grow();
       if (o.radius > r_min) this.grown = true;
       o.showOrganics(rough, color, change, offset);
-      // o.move(this.pos);
       o.pos = this.pos;
-      // o.showText(e);
       if (screen_2 && blob_distance < 10 && same_exp) {
         rileva = false;
         if (o.radius < width) {
@@ -122,7 +127,6 @@ class Blob {
   idle() {}
 
   attracted(target, intensity) {
-    // let dir = target - this.pos
     let force = p5.Vector.sub(target, this.pos);
     let d = force.mag();
     d = constrain(d, 1, 100);
@@ -130,8 +134,6 @@ class Blob {
     const speed = 40;
     const strength = G / d;
 
-    // if (d < 20) force.mult(-force.mag());
-    //  TODO Sometimes the blob breaks goes over the attraction point
     if ((d < 5 && intensity > 0.5) || detections.length < 2) this.vel.set(0, 0);
     else {
       if (intensity == 0) intensity = 0.1;
@@ -139,11 +141,6 @@ class Blob {
       force.setMag(mag);
       this.acc.add(force);
     }
-    // if (d < 20) force.sub(-this.vel);
-    // else if (d == 0) {
-    //   force.mult(0);
-    // }
-    // this.acc.add(force);
   }
 
   /**
@@ -157,14 +154,11 @@ class Blob {
     const now = Date.now();
     const interval = 1000;
     const amt = (now - lastTimestamp) / interval;
-    // console.log("amt:", amt);
 
     const c1 = this.prevProp.color;
     const c2 = this.nextProp.color;
 
-    // let amt = 0; // da 0 a 1
     this.properties.color = lerpColor(c1, c2, amt);
-    // console.log("lerped_color:", lerped_color);
     this.properties.changeIncrement = lerp(
       this.prevProp.changeIncrement,
       this.nextProp.changeIncrement,
