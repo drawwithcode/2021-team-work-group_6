@@ -204,10 +204,10 @@ Lastly, we tried to implement a background sound to accompany the whole experien
 
 [Valentina Bettoni](https://www.behance.net/valentibettoni)
 
-[Alessio Brioschi]()
+[Alessio Brioschi](https://www.behance.net/alessiobrioschi1)
 
 [Mara Castiglioni](https://www.behance.net/maracastiglioni)
 
 [Sara Gussoni](https://www.behance.net/saragussoni/projects)
 
-[Romario Muca]()
+[Romario Muca](https://www.behance.net/romario2/projects)
