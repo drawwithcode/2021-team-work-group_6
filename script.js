@@ -21,18 +21,20 @@ function startVideo() {
 }
 
 let detections;
-video.addEventListener("play", () => {
-  const canvas = faceapi.createCanvasFromMedia(video);
-  const displaySize = { width: windowWidth, height: windowHeight };
-  faceapi.matchDimensions(canvas, displaySize);
-  setInterval(async () => {
-    detections = await faceapi
-      .detectAllFaces(
-        video,
-        new faceapi.TinyFaceDetectorOptions({ inputSize: 416 })
-      )
-      .withFaceExpressions();
-    console.log("detections:", detections);
-    canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
-  }, 1000);
-});
+if (rileva) {
+  video.addEventListener("play", () => {
+    const canvas = faceapi.createCanvasFromMedia(video);
+    const displaySize = { width: windowWidth, height: windowHeight };
+    faceapi.matchDimensions(canvas, displaySize);
+    setInterval(async () => {
+      detections = await faceapi
+        .detectAllFaces(
+          video,
+          new faceapi.TinyFaceDetectorOptions({ inputSize: 416 })
+        )
+        .withFaceExpressions();
+      // console.log("detections:", detections);
+      canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
+    }, 1000);
+  });
+} else detections = [];
