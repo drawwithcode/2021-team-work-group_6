@@ -208,6 +208,6 @@ Lastly, we tried to implement a background sound to accompany the whole experien
 
 [Mara Castiglioni](https://www.behance.net/maracastiglioni)
 
-[Sara Gussoni]()
+[Sara Gussoni](https://www.behance.net/saragussoni/projects)
 
 [Romario Muca]()
