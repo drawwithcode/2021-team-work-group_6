@@ -48,7 +48,8 @@ Our project has been designed as an installation/exhibit; the installation is he
 
 # STRUCTURE
 
-(inserire un grafico)
+![scheme](/assets/schema.png)
+
 The project is composed of a single HTML page, in which the various parts are set to go off based on timers and the interaction of two faces in front of the screen.
 
 1. The introduction page invites the two users to place themselves in front of the two blobs
