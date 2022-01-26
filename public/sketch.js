@@ -252,7 +252,7 @@ function manageBlobs() {
       b.showBlobs();
     });
   } else if (!expansion) {
-    for (let i = 0; i < 2; i++) {
+    for (let i = 0; i < blobs.length; i++) {
       blobs[i].neutral = true;
       blobs[i].change += expressions_properties.neutral.changeIncrement;
       blobs[i].showBlobs();
@@ -340,8 +340,6 @@ function checkDistance(_blobs) {
 }
 
 function getFaceElements() {
-  //* Per ogni faccia rilevata
-  blobs_creati = [];
   detections.forEach((d, index) => {
     if (screen_1)
       blobs[index].pos.x =
@@ -353,7 +351,6 @@ function getFaceElements() {
     let c_exp = "";
     let i = 0;
 
-    //*  For magico per espressione corrente in testa
     for (const e in d.expressions) {
       const value = e === "neutral" ? d.expressions[e] * 0.1 : d.expressions[e];
       if (value > expValue) {
@@ -375,7 +372,7 @@ function getFaceElements() {
 
     blobs[index].intensity = d.expressions[c_exp];
 
-    //*  Transizione fluida tra stati
+    //*  Fluid transition between states
     if (prev != next) {
       console.log("%cTRANSITION!", "font-weight:bold; color:red");
       console.log(`${prev} --> ${next}`);
@@ -450,7 +447,6 @@ function shallowEquity(obj1, obj2) {
     if (key != "neutral") {
       const delta = abs(obj1[key] - obj2[key]);
       diff += delta;
-      // exp_perc[key] = round(map(delta, 0, 1, 100, 0), 1);
     }
   }
   // *Create object with % of every expression
