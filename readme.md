@@ -189,6 +189,8 @@ blobs[1].neutral = true;
       }
 ```
 
+Lastly, we tried to implement a background sound to accompany the whole experience; however, we experienced some troubles as the sound library conflicts with the function createVector that we used in [blob.js](blob.js), so we decided to abandon the idea.
+
 **REFERENCES AND TUTORIALS**
 
 [Build Real Time Face Detection With JavaScript](https://www.youtube.com/watch?v=CVClHLwv-4I&t=183s&ab_channel=WebDevSimplified)
