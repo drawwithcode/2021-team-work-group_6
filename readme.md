@@ -77,7 +77,7 @@ The library is able to detect and differentiate between 7 different expressions:
 
 The two blobs are created through the use of generative art based on the different emotions. To create them, we used a class called Organic, which contains the single layers that compose each blob
 
-```
+```JavaScript
   class Organic {
 
 constructor(id, radius, pos, roughness, angle, color) {
@@ -90,12 +90,11 @@ this.color = color; // color of the blob
 this.xSpeed = 1;
 this.ySpeed = 1;
 }
-
 ```
 
 and then we overlapped various layers in a Blob class to create the effective blob.
 
-```
+```JavaScript
 class Blob {
   constructor(x, y) {
     this.pos = createVector(x, y);
@@ -123,7 +122,7 @@ class Blob {
 Each expression is characterized by a color (chosen after a study on the topic of color emotion ), a rotation and a type of movement, for example:
 
 
-```
+```JavaScript
 neutral: {
       color: color(89, 84, 87, alpha),
       changeIncrement: 0.0,
@@ -134,7 +133,7 @@ neutral: {
 
 The movement of each blob is influenced by two points: one in the middle of the screen and one on the side of the screen where the blob stands; the blob on the right will be attracted by the middle and the right point, while the one on the left will be attracted to the middle and the left point. When the two expressions are in sync, the objects will be attracted by the point in the mirror and repulsed by the respective external points, whereas different expressions will pull the two blobs towards the respective external points and push them away from the middle one.
 
-```
+```JavaScript
  attracted(target, intensity) {
     // let dir = target - this.pos
     let force = p5.Vector.sub(target, this.pos);
@@ -153,7 +152,7 @@ The movement of each blob is influenced by two points: one in the middle of the 
     }
 ```
 
-```
+```JavaScript
   } if (screen_2) {
         //* Intensity of central point (-2, 2) --> 0-100%
         let mappedI = map(sync.curr, 0, 100, -2, 2);
@@ -176,7 +175,7 @@ Another challenging aspect was how to handle the presence of zero, one, two or m
 - if there is no one in front of the screen, the blobs will be neutral
 - if there is one person in front of the screen, the blob corresponding to the person will activate on the side where the person is located
 
-```
+```JavaScript
 if (detections.length == 1 && !expansion) {
 blobs[1].pos.x =
 blobs[0].pos.x < width / 2 ? startPositions[1] : startPositions[0];
@@ -187,7 +186,7 @@ blobs[1].neutral = true;
 
 - if there are two people in front of the screen, the animation of each blob will depend on the person standing in front of it and will correspond to the phisical side where the face is located
 
-```
+```JavaScript
   if (screen_2) {
         //* Intensity of central point (-2, 2) --> 0-100%
         let mappedI = map(sync.curr, 0, 100, -2, 2);
