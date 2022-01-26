@@ -24,7 +24,8 @@
 
 ## 4. [TEAM](#4-team)
 
---inserire immagine qui
+-----![ logo](/assets/favicon.svg =100x20)
+<img src="/assets/favicon.svg" width="200" height="200">
 
 # PROJECT IDEA
 
