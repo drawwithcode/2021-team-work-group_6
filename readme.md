@@ -16,7 +16,7 @@
 
 ### a. Face recognition
 
-### b. Generative art + palette
+### b. Generative art
 
 ### c. Challenges
 
@@ -53,10 +53,10 @@ The project is composed of a single HTML page, in which the various parts are se
 
 1. The introduction page invites the two users to place themselves in front of the two blobs
 2. The presence of two faces activates the second part of the experience: a brief text will appear on screen explaining how the experience work, and right after the two coloured blobs will start animating and moving depending on the detected facial expressions.
-   -a. if the two facial expressions match for a certain period of time, they will pull closer and overlap; statistics about the matching expressions and overall sync will be displayed on screen and the experience will come to an end.
-   -b. if for some reason the users abandon mid-experience, the absence of a face for more than a few seconds will stop the experience
-   -c. if there are less than two people in front of the screen, a countdown will activate, informing the user that there are not enough faces
-   -d. if there are more than two people an invitation will ask the users to reduce the number of faces in front of the screen
+   - **a.** if the two facial expressions match for a certain period of time, they will pull closer and overlap; statistics about the matching expressions and overall sync will be displayed on screen and the experience will come to an end
+   - **b.** if for some reason the users abandon mid-experience, the absence of a face for more than a few seconds will stop the experience
+   - **c.** if there are less than two people in front of the screen, a countdown will activate, informing the user that there are not enough faces
+   - **d.** if there are more than two people an invitation will ask the users to reduce the number of faces in front of the screen
 3. In case a,b and c, the page will go back to the introduction page, inviting other users to take their place in front of the screen.
 
 # CODE
@@ -83,7 +83,6 @@ this.color = color; // color of the blob
 this.xSpeed = 1;
 this.ySpeed = 1;
 }
-
 ```
 
 and then we overlapped various layers in a Blob class to create the effective blob.
@@ -112,7 +111,7 @@ class Blob {
   }
 ```
 
-Each expression is characterized by a color, a rotation and a type of movement, for example:
+Each expression is characterized by a color (chosen after a study on the topic of color emotion ), a rotation and a type of movement, for example:
 
 ```
 neutral: {
@@ -122,11 +121,73 @@ neutral: {
     }
 ```
 
+The movement of each blob is influenced by two points: one in the middle of the screen and one on the side of the screen where the blob stands; the blob on the right will be attracted by the middle and the right point, while the one on the left will be attracted to the middle and the left point. When the two expressions are in sync, the objects will be attracted by the point in the mirror and repulsed by the respective external points, whereas different expressions will pull the two blobs towards the respective external points and push them away from the middle one.
+
+```
+ attracted(target, intensity) {
+    // let dir = target - this.pos
+    let force = p5.Vector.sub(target, this.pos);
+    let d = force.mag();
+    d = constrain(d, 1, 100);
+    const G = 50;
+    const speed = 40;
+    const strength = G / d;
+
+    if ((d < 5 && intensity > 0.5) || detections.length < 2) this.vel.set(0, 0);
+    else {
+      if (intensity == 0) intensity = 0.1;
+      const mag = (strength * intensity * speed) / d;
+      force.setMag(mag);
+      this.acc.add(force);
+    }
+```
+
+```
+  } if (screen_2) {
+        //* Intensity of central point (-2, 2) --> 0-100%
+        let mappedI = map(sync.curr, 0, 100, -2, 2);
+        let mappedI_2 = map(sync.curr, 0, 100, 1, -1);
+        b.attracted(a0, mappedI);
+        b.pos.x < width / 2
+          ? b.attracted(a1, mappedI_2)
+          : b.attracted(a2, mappedI_2);
+        b.update(); //* Update blobs' postition
+      }
+```
+
 **CHALLENGES**
-Gestione libreria e assegnarle, determinare dx e sx, monitorare e gestire 2 persone
 
 We tried to use face-api implementing [ML5](https://ml5js.org/), an open source library which simplifies the use of machine learning libraries; however ML5 does not support face-api, so we had to directly download and install it.
 The main challenges we faced came from the implementation of the face-api library and, consequently, assigning each expression to a specific variable. The library is set to recognize 7 different emotions; unfortunately, especially when the code is set to analyse more than one face, it has some difficulties to differenciate between fear, disgust and anger.
+
+Another challenging aspect was how to handle the presence of zero, one, two or more people in front of the screen and how to make the blobs react. In the end, we came up with this solution:
+
+- if there is no one in front of the screen, the blobs will be neutral
+- if there is one person in front of the screen, the blob corresponding to the person will activate on the side where the person is located
+
+```
+if (detections.length == 1 && !expansion) {
+blobs[1].pos.x =
+blobs[0].pos.x < width / 2 ? startPositions[1] : startPositions[0];
+// console.log("blobs[1].pos.x:", blobs[1].pos.x);
+blobs[1].neutral = true;
+}
+```
+
+- if there are two people in front of the screen, the animation of each blob will depend on the person standing in front of it and will correspond to the phisical side where the face is located
+
+```
+  if (screen_2) {
+        //* Intensity of central point (-2, 2) --> 0-100%
+        let mappedI = map(sync.curr, 0, 100, -2, 2);
+        let mappedI_2 = map(sync.curr, 0, 100, 1, -1);
+        b.attracted(a0, mappedI);
+        b.pos.x < width / 2
+          ? b.attracted(a1, mappedI_2)
+          : b.attracted(a2, mappedI_2);
+        b.update(); //* Update blobs' postition
+      }
+```
 
 **REFERENCES AND TUTORIALS**
 
