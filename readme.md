@@ -177,9 +177,9 @@ if (screen_2) {
       }
 ```
 
-***STYLE***
+**STYLE**
 
-To manage the texts appearing in the various parts of the experience, we 
+To manage the texts appearing in the various parts of the experience, we implemented a CSS file 
 
 **CHALLENGES**
 
