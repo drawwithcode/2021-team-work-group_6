@@ -366,7 +366,7 @@ Lastly, we tried to implement a background sound to accompany the whole experien
 
 **COURSE**
 
-[Creative Coding 2020/2021](https://drawwithcode.github.io/2020/)
+[Creative Coding 2021/2022](https://drawwithcode.github.io/2020/)
 
 **Politecnico di Milano** - Scuola del Design
 
