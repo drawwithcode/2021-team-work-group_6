@@ -42,6 +42,7 @@ let duration_logout = 0;
 //  HTML Elements
 let div_scroll = [];
 let div_text_1;
+let about;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -99,7 +100,9 @@ function setup() {
   //HTML
   div_text_1 = select("#scritte-spiegazione");
   div_text_1.hide();
-  div_scroll = [select("#top"), select("#bottom")];
+  div_scroll = [select("#bottom")];
+  about = select("#about");
+  // div_scroll = [select("#top"), select("#bottom")];
 }
 
 function setInitialState() {
@@ -131,9 +134,13 @@ function drawScreen1() {
   div_scroll.forEach((d) => {
     d.show();
   });
+  about.show();
 
   if (detections) {
     manageBlobs();
+    textSize(20);
+    fill(255);
+    text("Faces detected: " + detections.length, width / 2, 100);
     if (detections.length == 2) {
       //  *Faccio partire le azimazioni
       if (!text_animation) {
@@ -151,7 +158,10 @@ function drawScreen1() {
           screen_2 = true;
         }
       }
-    }
+    } else if (detections.length == 1)
+      text("Waiting for another one", width / 2, 130);
+    else if (detections.length == 0)
+      text("SPEECHLESS is an experience for 2 people", width / 2, 130);
   } else {
     fill(255);
     textAlign(CENTER);
@@ -166,6 +176,7 @@ function drawScreen2() {
   div_scroll.forEach((d) => {
     d.hide();
   });
+  about.hide();
 
   div_text_1.hide();
   background(bg_color);
@@ -173,10 +184,10 @@ function drawScreen2() {
     fill(255);
     textSize(20);
     noStroke();
-    text("Faces detected: " + detections.length, 100, 100);
+    text("Faces detected: " + detections.length, width / 2, 100);
     if (detections.length == 2) {
       logout = false;
-      text("Syinc rate: " + sync.curr + "%", width / 2, 100);
+      text("Syinc rate: " + sync.curr + "%", width / 2, 130);
     } else if (detections.length < 2) {
       if (!logout) {
         start_logout = m;
@@ -193,7 +204,7 @@ function drawScreen2() {
           `Not enough faces!
         Returning home in: ${countdown}s`,
           width / 2,
-          100
+          130
         );
         pop();
         if (duration_logout >= logout_time) {
@@ -208,7 +219,7 @@ function drawScreen2() {
         `Too many faces!
         Make sure you are on an empty background`,
         width / 2,
-        100
+        130
       );
     }
     manageBlobs();
@@ -261,8 +272,8 @@ function manageBlobs() {
 }
 
 function drawScreen3() {
+  // about.show();
   const final_exp = blobs[0].expressions.next;
-
   if (!transition_bg) bg_color = expressions_properties[final_exp].color;
   background(bg_color);
 
@@ -285,12 +296,20 @@ function drawScreen3() {
 
     if (sync_printed >= sync.curr) {
       const phrase2 = `CLICK TO RESTART THE EXPERIENCE`;
-      const spaceY = 200;
+      const phrase3 = `SPEECHLESS is a project made for the 2021/22 Creative Coding course
+      Politecnico di Milano`;
+      const spaceY = 150;
       textSize(30);
       fill(0);
       text(phrase2, width / 2 + 1, height / 2 + 1 + spaceY);
       fill(255);
       text(phrase2, width / 2, height / 2 + spaceY);
+      const spaceY_2 = 200;
+      textSize(18);
+      fill(0);
+      text(phrase3, width / 2 + 1, height / 2 + 1 + spaceY_2 + 35);
+      fill(255);
+      text(phrase3, width / 2, height / 2 + spaceY_2 + 35);
     }
     pop();
   }
@@ -306,10 +325,10 @@ function mouseClicked() {
     setInitialState();
   }
 
-  // if (screen_1) {
-  //   screen_1 = false;
-  //   screen_2 = true;
-  // }
+  if (screen_1) {
+    screen_1 = false;
+    screen_2 = true;
+  }
 }
 
 //* Background color transition
