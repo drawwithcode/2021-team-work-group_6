@@ -18,9 +18,11 @@
 
 ### b. Generative art
 
-### c. Challenges
+### c. Style
 
-### d. References and tutorials
+### d. Challenges
+
+### e. References and tutorials
 
 ## 4. [TEAM](#4-team)
 
@@ -174,6 +176,10 @@ if (screen_2) {
   b.update(); // Update blobs' postition
       }
 ```
+
+***STYLE***
+
+To manage the texts appearing in the various parts of the experience, we 
 
 **CHALLENGES**
 
