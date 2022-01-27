@@ -26,7 +26,7 @@
 
 ## 4. [TEAM](#4-team)
 
-![](./assets-readme/greca.svg)
+![](./assets-readme/lopp text.gif)
 
 # PROJECT IDEA
 
@@ -176,6 +176,7 @@ if (screen_2) {
   b.update(); // Update blobs' postition
       }
 ```
+![](./assets-readme/blob_avvicinano.gif)
 
 **STYLE**
 
@@ -281,6 +282,7 @@ A challenging part was to make the Blobs continuously transition between the exp
     if (amt >= 1) this.transition = false;
   }
 ```
+![](./assets-readme/transizioni_blob.gif)
 
 The same method is used to transition between every sync percentage and to make the background fade to black at the end.
 
