@@ -26,7 +26,7 @@
 
 ## 4. [TEAM](#4-team)
 
-![](./assets-readme/lopp text.gif)
+![](./assets-readme/looptext.gif)
 
 # PROJECT IDEA
 
