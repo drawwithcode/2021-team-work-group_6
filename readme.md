@@ -281,6 +281,7 @@ A challenging part was to make the Blobs continuously transition between the exp
     if (amt >= 1) this.transition = false;
   }
 ```
+![](./assets-readme/transizioni_blob.gif)
 
 The same method is used to transition between every sync percentage and to make the background fade to black at the end.
 
