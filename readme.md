@@ -24,7 +24,7 @@
 
 ### e. References and tutorials
 
-## 4. [TEAM](#4-team)
+## 4. [TEAM](#team)
 
 ![](./assets-readme/looptext.gif)
 
