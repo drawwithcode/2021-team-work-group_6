@@ -176,6 +176,7 @@ if (screen_2) {
   b.update(); // Update blobs' postition
       }
 ```
+![](./assets-readme/blob_avvicinano.gif)
 
 **STYLE**
 
