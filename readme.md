@@ -179,7 +179,7 @@ if (screen_2) {
 
 **STYLE**
 
-To manage the texts appearing in the various parts of the experience, we implemented a CSS file 
+To manage the texts appearing in the various parts of the experience, we implemented a CSS file; both the dissolving transitions in the centre of the screen and the scrolling transitions on the top and the bottom of the page are handled though the [style.css](./public/style.css).
 
 **CHALLENGES**
 
