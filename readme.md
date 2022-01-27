@@ -18,13 +18,15 @@
 
 ### b. Generative art
 
-### c. Challenges
+### c. Style
 
-### d. References and tutorials
+### d. Challenges
 
-## 4. [TEAM](#4-team)
+### e. References and tutorials
 
-![](./assets-readme/greca.svg)
+## 4. [TEAM](#team)
+
+![](./assets-readme/looptext.gif)
 
 # PROJECT IDEA
 
@@ -174,6 +176,11 @@ if (screen_2) {
   b.update(); // Update blobs' postition
       }
 ```
+![](./assets-readme/blob_avvicinano.gif)
+
+**STYLE**
+
+To manage the texts appearing in the various parts of the experience, we implemented a CSS file; both the dissolving transitions in the centre of the screen and the scrolling transitions on the top and the bottom of the page are handled though the [style.css](./public/style.css).
 
 **CHALLENGES**
 
@@ -275,6 +282,7 @@ A challenging part was to make the Blobs continuously transition between the exp
     if (amt >= 1) this.transition = false;
   }
 ```
+![](./assets-readme/transizioni_blob.gif)
 
 The same method is used to transition between every sync percentage and to make the background fade to black at the end.
 
@@ -356,6 +364,10 @@ Lastly, we tried to implement a background sound to accompany the whole experien
 
 [Romario Muca](https://www.behance.net/romario2/projects)
 
-```
+**COURSE**
 
-```
+[Creative Coding 2021/2022](https://drawwithcode.github.io/2020/)
+
+**Politecnico di Milano** - Scuola del Design
+
+**Faculty:** Michele Mauri, Andrea Benedetti, Tommaso Elli.
