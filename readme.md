@@ -26,7 +26,7 @@
 
 ## 4. [TEAM](#4-team)
 
-![](./assets-readme/greca.svg)
+![](./assets-readme/lopp text.gif)
 
 # PROJECT IDEA
 
