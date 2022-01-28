@@ -132,18 +132,6 @@ a:visited {
   font-size: 1.5em;
 }
 
-<<<<<<< HEAD
-a:link,
-a:visited {
-  color: white;
-  text-decoration: none;
-}
-
-#text_about {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-=======
 .about_text {
   position: absolute;
   margin: auto;
@@ -151,5 +139,4 @@ a:visited {
   top: 15vh;
   left: 25vw;
   font-size: 1.2em;
->>>>>>> main
 }
