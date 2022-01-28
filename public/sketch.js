@@ -29,7 +29,7 @@ let m = 0;
 let ts;
 let sPrev, sNext;
 
-//Timers
+// Timers
 let rileva = true;
 let text_animation = false;
 let start;
@@ -39,7 +39,7 @@ let logout = false;
 let start_logout = 0;
 let duration_logout = 0;
 
-//  HTML Elements
+// HTML Elements
 let div_scroll = [];
 let div_text_1;
 let about;
@@ -51,8 +51,9 @@ function setup() {
   textStyle(NORMAL);
   textFont("lores-12");
 
-  startPositions = [width / 3, (width / 3) * 2];
+  startPositions = [width / 3, (width / 3) * 2]; // set initial position for blobs
 
+  // Attributes for each expression
   expressions_properties = {
     disgusted: {
       color: color(125, 223, 100),
@@ -97,7 +98,7 @@ function setup() {
   a1 = createVector(100, height / 2);
   a2 = createVector(width - 100, height / 2);
 
-  //HTML
+  // HTML
   div_text_1 = select("#scritte-spiegazione");
   div_text_1.hide();
   div_scroll = [select("#bottom")];
@@ -106,7 +107,7 @@ function setup() {
 }
 
 function setInitialState() {
-  //  Initializing objects and creating blobs
+  // Initializing objects and creating blobs
   blobs = [];
   for (let j = 0; j < 2; j++) {
     blobs[j] = new Blob(j, (j + 1) * (width / 3), height / 2);
@@ -136,6 +137,7 @@ function drawScreen1() {
   });
   about.show();
 
+  // Handle sentences printed for each case of face detection
   if (detections) {
     manageBlobs();
     textSize(20);
@@ -159,7 +161,7 @@ function drawScreen1() {
         }
       }
     } else if (detections.length == 1)
-      text("Waiting for another one", width / 2, 130);
+      text("Waiting for another human being", width / 2, 130);
     else if (detections.length == 0)
       text("SPEECHLESS is an experience for 2 people", width / 2, 130);
   } else {
@@ -194,6 +196,7 @@ function drawScreen2() {
         logout = true;
       }
 
+      // When there aren't enough faces, starts a timer to return at the beginning of the experience
       if (logout) {
         // *Start timer
         duration_logout = m - start_logout;
@@ -239,7 +242,7 @@ function manageBlobs() {
     blobs.forEach((b) => {
       b.neutral = false;
 
-      //  If there's one detection, draw a Neutral in the empty side
+      //  If there's one detection, draw a neutral in the empty side
       if (detections.length == 1 && !expansion) {
         blobs[1].pos.x =
           blobs[0].pos.x < width / 2 ? startPositions[1] : startPositions[0];
@@ -271,6 +274,7 @@ function manageBlobs() {
   }
 }
 
+//
 function drawScreen3() {
   // about.show();
   const final_exp = blobs[0].expressions.next;

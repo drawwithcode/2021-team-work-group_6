@@ -1,5 +1,7 @@
 /**
- * *Organic is used as layer to create the Blob
+ * *Organic is used as layer to create the Blobs
+ * it contains the single layers that compose each blob
+ *
  * https://medium.com/creative-coding-space/meet-blobby-in-p5-js-5d9d99232400
  */
 class Organic {
@@ -25,7 +27,7 @@ class Organic {
     beginShape();
 
     this.off = 0;
-    //The lines below create our vertex points
+    // The lines below create our vertex points
     for (let i = 0; i < TWO_PI; i += 0.1) {
       let offset = map(
         noise(this.off, _change),
@@ -44,6 +46,11 @@ class Organic {
     pop();
   }
 
+  /**
+   * Increase the radius of blob till is 100
+   * then stamp values of expression made us synchronize
+   *
+   */
   expand() {
     this.radius += 10;
 
@@ -55,6 +62,9 @@ class Organic {
     }
   }
 
+  /**
+   * Increase the radius of blob when detect a face
+   */
   grow() {
     const speed = 0.05;
     const incrementDelta = 5;

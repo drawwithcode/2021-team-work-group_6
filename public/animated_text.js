@@ -1,4 +1,6 @@
 // *Animation Scroll Texts
+// using javascript to duplicate sentences to avoid repeating them in HTML
+
 const frase = "PLEASE STAND IN FRONT OF YOUR BLOB ●&nbsp;";
 let content = document.getElementsByClassName("loop");
 if (screen_1)

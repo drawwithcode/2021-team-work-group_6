@@ -6,6 +6,10 @@
  * Video: https://youtu.be/OAcXnzRNiCY
  */
 
+/**
+ * Overlap various layers in a Blob class to create the effective blob
+ *
+ */
 class Blob {
   constructor(id, x, y) {
     this.id = id;
@@ -104,16 +108,21 @@ class Blob {
     }
     stroke(255);
     this.organics.forEach((o) => {
-      if (screen_1 && !this.grown && detections.length > 0) o.grow();
+      if (screen_1 && !this.grown && detections.length > 0) o.grow(); // increase the radius of blob when the number of faces detected is more than 0
       if (o.radius > r_min) this.grown = true;
       o.showOrganics(rough, color, change, offset);
       o.pos = this.pos;
+
+      // increase the radius of blobs to merge them
       if (screen_2 && blob_distance < 10 && same_exp) {
         rileva = false;
+        // increasing radius till blobs overlay the entire screen
         if (o.radius < width) {
           expansion = true;
           o.expand();
-        } else {
+        }
+        // activate the 3rd screen where we stamp results
+        else {
           expansion = false;
           this.delay = false;
           screen_2 = false;
