@@ -115,16 +115,6 @@ function setInitialState() {
  * Screen 2 => {@link drawScreen2()}
  * Screen 3 => {@link drawScreen3()}
  */
-
-// function musicPlay() {
-//   if (mouseMoved) {
-//     mySong.play();
-//   } else {
-//     if (mySong.isPlaying() === false) {
-//       mySong.play();
-//     }
-//   }
-// }
 function draw() {
   m = millis();
   if (screen_1) drawScreen1();
@@ -338,15 +328,16 @@ function transitionBG(c1, timeStamp) {
     screen_1 = true;
     rileva = true;
   }
+}
 
-  function checkDistance(_blobs) {
-    same_exp =
-      _blobs[0].expressions.next == _blobs[1].expressions.next ? true : false;
+function checkDistance(_blobs) {
+  same_exp =
+    _blobs[0].expressions.next == _blobs[1].expressions.next ? true : false;
 
-    const f = p5.Vector.sub(_blobs[0].pos, _blobs[1].pos);
-    const d = f.mag();
-    return d;
-  }
+  const f = p5.Vector.sub(_blobs[0].pos, _blobs[1].pos);
+  const d = f.mag();
+  return d;
+}
 
 function getFaceElements() {
   //* Per ogni faccia rilevata
@@ -369,25 +360,11 @@ function getFaceElements() {
         c_exp = e;
         expValue = value;
       }
-    });
 
-    if (detections.length == 2) {
-      sync.prev = sync.next;
-      sync.next = shallowEquity(
-        blobs[0].expressionList,
-        blobs[1].expressionList
-      );
-      if (sync.prev != sync.next) {
-        // console.log(`Sync: ${sync.prev} --> ${sync.next}`);
-        sync_transition = true;
-        timeStamp = Date.now();
-        sPrev = sync.prev;
-        sNext = sync.next;
-      }
-      if (sync_transition) {
-        sync.curr = lerpSync(sPrev, sNext, timeStamp);
-      } else {
-        sync.curr = sync.next;
+      //  Display expressions values
+      if (screen_2) {
+        drawExpressionValues(e, d.expressions, index, i);
+        i++;
       }
     }
 
@@ -427,62 +404,54 @@ function getFaceElements() {
 
     sync.curr = sync_transition ? lerpSync(sPrev, sNext, timeStamp) : sync.next;
   }
+}
 
-  /**
-   * *Function to display the values of the expressions
-   * @param {String} e
-   * @param {Object} expObj
-   * @param {*} index
-   * @param {*} i
-   */
-  function drawExpressionValues(e, expObj, index, i) {
-    const spacing = 20;
-    if (e != "asSortedArray") {
-      push();
-      let offX = 0;
-      let offY = (height / 3) * 2;
-      offX = blobs[index].pos.x < width / 2 ? width / 10 : width - width / 8;
+/**
+ * *Function to display the values of the expressions
+ * @param {String} e
+ * @param {Object} expObj
+ * @param {*} index
+ * @param {*} i
+ */
+function drawExpressionValues(e, expObj, index, i) {
+  const spacing = 20;
+  if (e != "asSortedArray") {
+    push();
+    let offX = 0;
+    let offY = (height / 3) * 2;
+    offX = blobs[index].pos.x < width / 2 ? width / 10 : width - width / 8;
 
-      if (currX[index] <= 200) {
-        offX = width - width / 8;
-      } else {
-        offX = width / 100;
-      }
-      translate(offX, offY);
-      const _color = expressions_properties[e].color;
-      let _value = round(expObj[e] * 10, 3);
+    translate(offX, offY);
+    const _color = expressions_properties[e].color;
+    let _value = round(expObj[e] * 10, 3);
 
-      if (isNaN(_value)) _value = 0;
+    if (isNaN(_value)) _value = 0;
 
-      _color.setAlpha(255);
-      fill(_color);
-      textSize(15);
-      textAlign(LEFT);
-      const nameExp = e.charAt(0).toUpperCase() + e.slice(1);
-      if (e != "neutral") text(`${nameExp}: ` + _value, 0, spacing * i);
-      pop();
-    }
+    _color.setAlpha(255);
+    fill(_color);
+    textSize(15);
+    textAlign(LEFT);
+    const nameExp = e.charAt(0).toUpperCase() + e.slice(1);
+    if (e != "neutral") text(`${nameExp}: ` + _value, 0, spacing * i);
+    pop();
   }
+}
 
-  /**
-   * *shallowEquity between 2 objects
-   * Used to measure the difference between each expression and measure how similar they are in %
-   * @param {*} objects
-   * @returns
-   */
-  function shallowEquity(obj1, obj2) {
-    const keys = Object.keys(obj1);
-    let diff = 0;
-    for (let key of keys) {
-      if (key != "neutral") {
-        const delta = abs(obj1[key] - obj2[key]);
-        diff += delta;
-        // exp_perc[key] = round(map(delta, 0, 1, 100, 0), 1);
-      }
+/**
+ * *shallowEquity between 2 objects
+ * Used to measure the difference between each expression and measure how similar they are in %
+ * @param {*} objects
+ * @returns
+ */
+function shallowEquity(obj1, obj2) {
+  const keys = Object.keys(obj1);
+  let diff = 0;
+  for (let key of keys) {
+    if (key != "neutral") {
+      const delta = abs(obj1[key] - obj2[key]);
+      diff += delta;
+      // exp_perc[key] = round(map(delta, 0, 1, 100, 0), 1);
     }
-    // *Create object with % of every expression
-    let perc = map(diff, 0, 2, 100, 0);
-    return round(perc, 1);
   }
   // *Create object with % of every expression
   let perc = map(diff, 0, 2, 100, 0);
@@ -502,24 +471,7 @@ function lerpSync(prev, next, timeStamp) {
   const amt = (now - timeStamp) / interval;
   const lerped = lerp(prev, next, amt);
 
-  /**
-   * Everytime the sync changes this function lerps the value during the 1 second interval
-   * @param {number} prev
-   * @param {number} next
-   * @param {number} timeStamp
-   * @returns {number}
-   */
-  function lerpSync(prev, next, timeStamp) {
-    const now = Date.now();
-    const interval = 1000;
-    const amt = (now - timeStamp) / interval;
+  if (amt > 1) sync_transition = false;
 
-    const lerped = lerp(prev, next, amt);
-    // console.log(`Sync: ${prev} --> ${next} == ${lerped}
-    //  Amt: ${amt}`);
-
-    if (amt > 1) sync_transition = false;
-
-    return round(lerped);
-  }
+  return round(lerped);
 }

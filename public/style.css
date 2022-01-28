@@ -109,3 +109,15 @@ canvas {
   transform: translate(-50%, -50%);
   font-size: 1.5em;
 }
+
+a:link,
+a:visited {
+  color: white;
+  text-decoration: none;
+}
+
+#text_about {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+}
