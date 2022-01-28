@@ -30,7 +30,6 @@ class Blob {
     this.prevProp = {};
     this.nextProp = {};
 
-    this.side = "";
     this.expressionList = {};
 
     this.neutral = false;
@@ -123,8 +122,6 @@ class Blob {
       }
     });
   }
-
-  idle() {}
 
   attracted(target, intensity) {
     let force = p5.Vector.sub(target, this.pos);

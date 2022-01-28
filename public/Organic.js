@@ -7,9 +7,9 @@ class Organic {
     this.id = id;
     this.radius = radius; //radius of blob
     this.pos = pos;
-    this.roughness = roughness; // magnitude of how much the circle is distorted
-    this.angle = angle; //how much to rotate the circle by
-    this.color = color; // color of the blob
+    this.roughness = roughness; //magnitude of distortion
+    this.angle = angle; //angle of rotation
+    this.color = color; //color of the blob
     this.off = 0;
   }
 
@@ -19,12 +19,9 @@ class Organic {
     this.color.setAlpha(alpha);
     this.roughness = _rough * 10;
     fill(this.color); //color to fill the blob
-
-    //we enclose things between push and pop so that all transformations within only affect items within
     push();
     translate(this.pos); //move to xpos, ypos
     rotate(this.angle + _change); //rotate by this.angle+change
-    //begin a shape based on the vertex points below
     beginShape();
 
     this.off = 0;

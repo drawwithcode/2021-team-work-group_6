@@ -1,5 +1,5 @@
 :root {
-  --animation-delay: 5s;
+  --animation-delay: 3.5s;
 }
 
 * {
@@ -26,6 +26,28 @@ canvas {
   font-size: 1em;
 }
 
+#about {
+  position: absolute;
+  width: 80vw;
+  top: 2vw;
+  left: 2vw;
+}
+
+a {
+  color: white;
+  text-decoration: none;
+}
+
+a:hover {
+  color: white;
+  text-decoration: underline;
+}
+
+a:visited {
+  color: white;
+  text-decoration: none;
+}
+
 #top div {
   position: fixed;
   display: inline-block;
@@ -34,7 +56,7 @@ canvas {
 #bottom div {
   position: fixed;
   display: inline-block;
-  bottom: 0;
+  bottom: 2vw;
 }
 
 .loop {
@@ -110,6 +132,7 @@ canvas {
   font-size: 1.5em;
 }
 
+<<<<<<< HEAD
 a:link,
 a:visited {
   color: white;
@@ -120,4 +143,13 @@ a:visited {
   position: absolute;
   top: 50%;
   left: 50%;
+=======
+.about_text {
+  position: absolute;
+  margin: auto;
+  width: 50vw;
+  top: 15vh;
+  left: 25vw;
+  font-size: 1.2em;
+>>>>>>> main
 }
