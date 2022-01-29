@@ -1,3 +1,19 @@
+/**
+ *! SPEECHLESS !
+ *  An immersive experience where two people can communicate using
+ *  only their facial expression.
+ *  The project explores the capabilities of the face detecting algorithms
+ *  while allowing two people to interact with each other without the need for language.device
+ *
+ *  DEVELOPED BY
+ *  Valentina Bettoni, Alessio Brioschi, Mara Castiglioni, Sara Gussoni, Romario Muca
+ *
+ *  FACULTY
+ *  Michele Mauri, Andrea Benedetti, Tommaso Elli
+ *
+ *  Reaòized as final project for the Crative Coding course 2021/2022
+ *  Politecnico di Milano
+ */
 let blobs = [];
 let a0;
 let a1;
@@ -92,6 +108,8 @@ function setup() {
     },
   };
 
+  loading_blob = new Blob(2, width / 2, height / 2);
+
   setInitialState();
 
   a0 = createVector(width / 2, height / 2);
@@ -102,8 +120,7 @@ function setup() {
   div_text_1 = select("#scritte-spiegazione");
   div_text_1.hide();
   div_scroll = [select("#bottom")];
-  about = select("#about");
-  // div_scroll = [select("#top"), select("#bottom")];
+  about = select("#top-left");
 }
 
 function setInitialState() {
@@ -144,7 +161,7 @@ function drawScreen1() {
     fill(255);
     text("Faces detected: " + detections.length, width / 2, 100);
     if (detections.length == 2) {
-      //  *Faccio partire le azimazioni
+      //  Starting the text animation
       if (!text_animation) {
         start = m;
         div_text_1.show();
@@ -198,14 +215,14 @@ function drawScreen2() {
 
       // When there aren't enough faces, starts a timer to return at the beginning of the experience
       if (logout) {
-        // *Start timer
+        // Start timer
         duration_logout = m - start_logout;
         const countdown = round((logout_time - duration_logout) / 1000);
         push();
         textAlign(CENTER);
         text(
           `Not enough faces!
-        Returning home in: ${countdown}s`,
+Returning home in: ${countdown}s`,
           width / 2,
           130
         );
@@ -220,7 +237,7 @@ function drawScreen2() {
     } else if (detections.length > 2) {
       text(
         `Too many faces!
-        Make sure you are on an empty background`,
+Make sure you are on an empty background`,
         width / 2,
         130
       );
@@ -250,14 +267,14 @@ function manageBlobs() {
       }
 
       if (screen_2) {
-        //* Intensity of central point (-2, 2) --> 0-100%
+        // Intensity of central point (-2, 2) --> 0-100%
         let mappedI = map(sync.curr, 0, 100, -2, 2);
         let mappedI_2 = map(sync.curr, 0, 100, 1, -1);
         b.attracted(a0, mappedI);
         b.pos.x < width / 2
           ? b.attracted(a1, mappedI_2)
           : b.attracted(a2, mappedI_2);
-        b.update(); //* Update blobs' postition
+        b.update(); // Update blobs' postition
       }
       //* Speed of change
       b.change += !b.neutral
@@ -274,9 +291,7 @@ function manageBlobs() {
   }
 }
 
-//
 function drawScreen3() {
-  // about.show();
   const final_exp = blobs[0].expressions.next;
   if (!transition_bg) bg_color = expressions_properties[final_exp].color;
   background(bg_color);
@@ -286,13 +301,14 @@ function drawScreen3() {
       if (sync_printed <= sync.curr) sync_printed += 0.1;
     const rounded_sync = floor(sync_printed, 1);
     const phrase1 = `Congratulations!
-    You completed the experience!
-    Your expression: ${final_exp.toUpperCase()}
-    Your sync: ${rounded_sync}%`;
+You completed the experience!
+Your expression: ${final_exp.toUpperCase()}
+Your sync: ${rounded_sync}%`;
     push();
     textSize(40);
     noStroke();
     textAlign(CENTER);
+    //  Duplicating the text with 1px shift to create a black shadow
     fill(0);
     text(phrase1, width / 2 + 1, height / 4 + 1);
     fill(255);
@@ -335,7 +351,7 @@ function mouseClicked() {
   }
 }
 
-//* Background color transition
+// Background color transition
 function transitionBG(c1, timeStamp) {
   const now = Date.now();
   const interval = 1000;
@@ -351,6 +367,7 @@ function transitionBG(c1, timeStamp) {
   }
 }
 
+//  Mesuring the distance using vectors properties
 function checkDistance(_blobs) {
   same_exp =
     _blobs[0].expressions.next == _blobs[1].expressions.next ? true : false;
@@ -360,8 +377,12 @@ function checkDistance(_blobs) {
   return d;
 }
 
+/**
+ * Function that handles the detections provided by the face-api
+ */
 function getFaceElements() {
   detections.forEach((d, index) => {
+    //  Checking whether the face is on the left or the right side of the camera/display
     if (screen_1)
       blobs[index].pos.x =
         d.detection._box._x > 200 ? startPositions[0] : startPositions[1];
@@ -372,6 +393,7 @@ function getFaceElements() {
     let c_exp = "";
     let i = 0;
 
+    //  Obtaining the strongest expression
     for (const e in d.expressions) {
       const value = e === "neutral" ? d.expressions[e] * 0.1 : d.expressions[e];
       if (value > expValue) {
@@ -386,6 +408,7 @@ function getFaceElements() {
       }
     }
 
+    //  Assigning previous and next expression to make the transition
     blobs[index].expressions.prev = blobs[index].expressions.next;
     blobs[index].expressions.next = c_exp;
     const prev = blobs[index].expressions.prev;
@@ -393,7 +416,7 @@ function getFaceElements() {
 
     blobs[index].intensity = d.expressions[c_exp];
 
-    //*  Fluid transition between states
+    //  Fluid transition between states
     if (prev != next) {
       console.log("%cTRANSITION!", "font-weight:bold; color:red");
       console.log(`${prev} --> ${next}`);
@@ -410,6 +433,7 @@ function getFaceElements() {
     }
   });
 
+  //  If there are two faces --> Check how similar the datasets are
   if (detections.length == 2) {
     sync.prev = sync.next;
     sync.next = shallowEquity(blobs[0].expressionList, blobs[1].expressionList);
@@ -456,7 +480,7 @@ function drawExpressionValues(e, expObj, index, i) {
 }
 
 /**
- * *shallowEquity between 2 objects
+ * *Shallow Equality between 2 objects
  * Used to measure the difference between each expression and measure how similar they are in %
  * @param {*} objects
  * @returns
@@ -470,13 +494,13 @@ function shallowEquity(obj1, obj2) {
       diff += delta;
     }
   }
-  // *Create object with % of every expression
+  // Create object with % of every expression
   let perc = map(diff, 0, 2, 100, 0);
   return round(perc, 1);
 }
 
 /**
- * Everytime the sync changes this function lerps the value during the 1 second interval
+ * *Everytime the sync changes this function lerps the value during the 1 second interval
  * @param {number} prev
  * @param {number} next
  * @param {number} timeStamp

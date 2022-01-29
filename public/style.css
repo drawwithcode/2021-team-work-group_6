@@ -26,11 +26,37 @@ canvas {
   font-size: 1em;
 }
 
-#about {
+#top-left {
   position: absolute;
   width: 80vw;
-  top: 2vw;
+  top: 4vh;
   left: 2vw;
+}
+
+#center {
+  position: absolute;
+  width: 10vw;
+  top: 4vh;
+  left: 47vw;
+}
+
+/*posizione scritte*/
+.p_text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.5em;
+}
+
+.about_text {
+  position: absolute;
+  margin: auto;
+  width: 50vw;
+  top: 12vh;
+  left: 25vw;
+  font-size: 1.2em;
+  line-height: 1.2;
 }
 
 a {
@@ -48,6 +74,10 @@ a:visited {
   text-decoration: none;
 }
 
+#logo:hover {
+  text-decoration: none;
+}
+
 #top div {
   position: fixed;
   display: inline-block;
@@ -59,9 +89,36 @@ a:visited {
   bottom: 2vw;
 }
 
+/* #outer {
+  overflow: hidden;
+}
+
+#outer div {
+  display: inline-block;
+} */
+
 .loop {
   white-space: nowrap;
   animation: loop-anim 20s linear infinite;
+}
+
+.c-1 {
+  color: rgb(125, 223, 100);
+}
+.c-2 {
+  color: rgb(230, 13, 100);
+}
+.c-3 {
+  color: rgb(177, 15, 46);
+}
+.c-4 {
+  color: rgb(255, 107, 46);
+}
+.c-5 {
+  color: rgb(77, 108, 250);
+}
+.c-6 {
+  color: rgb(154, 72, 208);
 }
 
 @keyframes loop-anim {
@@ -69,7 +126,7 @@ a:visited {
     margin-left: 0;
   }
   100% {
-    margin-left: -50%; /* This works because of the div between "top" and "loop" */
+    margin-left: -100%;
   }
 }
 
@@ -121,22 +178,4 @@ a:visited {
   100% {
     opacity: 0;
   }
-}
-
-/*posizione scritte*/
-.p_text {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 1.5em;
-}
-
-.about_text {
-  position: absolute;
-  margin: auto;
-  width: 50vw;
-  top: 15vh;
-  left: 25vw;
-  font-size: 1.2em;
 }

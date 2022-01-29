@@ -6,10 +6,7 @@
  * Video: https://youtu.be/OAcXnzRNiCY
  */
 
-/**
- * Overlap various layers in a Blob class to create the effective blob
- *
- */
+//  Overlap various layers in a Blob class to create the effective blob
 class Blob {
   constructor(id, x, y) {
     this.id = id;
